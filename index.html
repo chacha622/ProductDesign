@@ -1,1722 +1,400 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CuraNav 治愈导航 · 产品原型</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-<style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-  :root {
-    --navy: #071929;
-    --navy-mid: #0D3552;
-    --navy-card: #102840;
-    --teal: #00C9B8;
-    --teal-dark: #009E90;
-    --teal-light: rgba(0,201,184,0.12);
-    --mint: #02E8C0;
-    --blue: #1A8FD1;
-    --coral: #FF6B6B;
-    --gold: #F5C842;
-    --white: #FFFFFF;
-    --text-dim: rgba(255,255,255,0.5);
-    --text-muted: rgba(255,255,255,0.7);
-    --card-border: rgba(0,201,184,0.2);
-    --divider: rgba(255,255,255,0.08);
-  }
-
-  body {
-    font-family: 'Noto Sans SC', -apple-system, sans-serif;
-    background: #04111e;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: flex-start;
-    padding: 40px 20px;
-    color: var(--white);
-  }
-
-  /* Header */
-  .page-header {
-    text-align: center;
-    margin-bottom: 32px;
-  }
-  .page-header .logo {
-    font-size: 28px;
-    font-weight: 700;
-    color: var(--teal);
-    letter-spacing: -0.5px;
-  }
-  .page-header .sub {
-    font-size: 13px;
-    color: var(--text-dim);
-    margin-top: 4px;
-    letter-spacing: 2px;
-    text-transform: uppercase;
-  }
-
-  /* Phone frame */
-  .phone-scene {
-    position: relative;
-    display: flex;
-    gap: 32px;
-    align-items: flex-start;
-    justify-content: center;
-    width: 100%;
-    max-width: 900px;
-  }
-
-  .phone-frame {
-    position: relative;
-    width: 375px;
-    height: 780px;
-    background: #020e1a;
-    border-radius: 48px;
-    border: 2px solid rgba(0,201,184,0.3);
-    overflow: hidden;
-    flex-shrink: 0;
-    box-shadow: 0 0 60px rgba(0,201,184,0.08), 0 40px 80px rgba(0,0,0,0.6);
-  }
-
-  .phone-notch {
-    position: absolute;
-    top: 0;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 120px;
-    height: 28px;
-    background: #020e1a;
-    border-radius: 0 0 20px 20px;
-    z-index: 100;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-  }
-  .notch-dot { width: 8px; height: 8px; border-radius: 50%; background: #1a2e42; }
-  .notch-cam { width: 12px; height: 12px; border-radius: 50%; background: #1a2e42; }
-
-  .status-bar {
-    height: 44px;
-    display: flex;
-    align-items: flex-end;
-    justify-content: space-between;
-    padding: 0 20px 6px;
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-muted);
-    position: relative;
-    z-index: 50;
-    flex-shrink: 0;
-  }
-
-  /* Screens */
-  .screen-container {
-    position: relative;
-    width: 100%;
-    height: calc(780px - 44px - 72px);
-    overflow: hidden;
-  }
-
-  .screen {
-    position: absolute;
-    top: 0; left: 0;
-    width: 100%;
-    height: 100%;
-    overflow-y: auto;
-    overflow-x: hidden;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.2s ease;
-    scrollbar-width: none;
-  }
-  .screen::-webkit-scrollbar { display: none; }
-  .screen.active { opacity: 1; pointer-events: all; }
-
-  /* Bottom Nav */
-  .bottom-nav {
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 72px;
-    background: rgba(7,25,41,0.95);
-    border-top: 1px solid var(--divider);
-    display: flex;
-    align-items: center;
-    z-index: 50;
-    backdrop-filter: blur(12px);
-  }
-  .nav-item {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 3px;
-    padding-bottom: 8px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .nav-icon {
-    width: 26px;
-    height: 26px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .nav-icon svg { transition: all 0.2s; }
-  .nav-label {
-    font-size: 10px;
-    color: var(--text-dim);
-    transition: color 0.2s;
-    font-weight: 400;
-  }
-  .nav-item.active .nav-label { color: var(--teal); }
-  .nav-item.active .nav-icon svg { filter: drop-shadow(0 0 4px var(--teal)); }
-
-  /* ─── SCREEN 1: AI Chat ─── */
-  .chat-header {
-    padding: 16px 20px 12px;
-    background: var(--navy);
-  }
-  .chat-header-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    margin-bottom: 12px;
-  }
-  .ai-avatar {
-    width: 36px; height: 36px;
-    border-radius: 12px;
-    background: linear-gradient(135deg, var(--teal-dark), var(--blue));
-    display: flex; align-items: center; justify-content: center;
-  }
-  .ai-name { font-size: 15px; font-weight: 500; }
-  .ai-status { font-size: 11px; color: var(--teal); display: flex; align-items: center; gap: 4px; }
-  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--teal); }
-  .upload-btn {
-    background: var(--teal-light);
-    border: 1px solid var(--card-border);
-    border-radius: 10px;
-    padding: 7px 14px;
-    font-size: 12px;
-    color: var(--teal);
-    cursor: pointer;
-    display: flex; align-items: center; gap: 6px;
-    font-family: inherit;
-    transition: background 0.2s;
-  }
-  .upload-btn:hover { background: rgba(0,201,184,0.2); }
-
-  .quick-chips {
-    display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px;
-  }
-  .quick-chips::-webkit-scrollbar { display: none; }
-  .chip {
-    background: var(--navy-card);
-    border: 1px solid var(--divider);
-    border-radius: 20px;
-    padding: 6px 12px;
-    font-size: 11px;
-    color: var(--text-muted);
-    white-space: nowrap;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-  .chip:hover { border-color: var(--teal); color: var(--teal); }
-
-  .chat-messages {
-    padding: 16px 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-
-  .msg-row { display: flex; align-items: flex-end; gap: 8px; }
-  .msg-row.user { justify-content: flex-end; }
-
-  .msg-avatar {
-    width: 28px; height: 28px;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #1A5276, #2E86C1);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 11px; font-weight: 700;
-    flex-shrink: 0;
-  }
-
-  .msg-bubble {
-    max-width: 240px;
-    padding: 10px 14px;
-    border-radius: 16px;
-    font-size: 13px;
-    line-height: 1.55;
-  }
-  .msg-row.ai .msg-bubble {
-    background: var(--navy-card);
-    border: 1px solid var(--card-border);
-    border-bottom-left-radius: 4px;
-    color: var(--white);
-  }
-  .msg-row.user .msg-bubble {
-    background: var(--blue);
-    border-bottom-right-radius: 4px;
-    color: var(--white);
-  }
-
-  .knowledge-chips-row {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 8px;
-  }
-  .k-chip {
-    background: rgba(0,201,184,0.1);
-    border: 1px solid var(--card-border);
-    border-radius: 8px;
-    padding: 4px 10px;
-    font-size: 11px;
-    color: var(--teal);
-    cursor: pointer;
-    transition: all 0.2s;
-    font-family: inherit;
-  }
-  .k-chip:hover { background: rgba(0,201,184,0.2); }
-
-  .citation-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    background: rgba(26,143,209,0.15);
-    border: 1px solid rgba(26,143,209,0.3);
-    border-radius: 6px;
-    padding: 3px 8px;
-    font-size: 10px;
-    color: var(--blue);
-    margin-top: 6px;
-    cursor: pointer;
-  }
-
-  .chat-input-area {
-    position: sticky;
-    bottom: 0;
-    background: var(--navy);
-    border-top: 1px solid var(--divider);
-    padding: 10px 12px;
-    display: flex;
-    gap: 8px;
-    align-items: center;
-  }
-  .chat-input {
-    flex: 1;
-    background: var(--navy-card);
-    border: 1px solid var(--card-border);
-    border-radius: 20px;
-    padding: 9px 14px;
-    font-size: 13px;
-    color: var(--white);
-    outline: none;
-    font-family: inherit;
-  }
-  .chat-input::placeholder { color: var(--text-dim); }
-  .send-btn {
-    width: 36px; height: 36px;
-    border-radius: 50%;
-    background: var(--teal);
-    border: none;
-    cursor: pointer;
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    transition: background 0.2s;
-  }
-  .send-btn:hover { background: var(--mint); }
-
-  /* ─── SCREEN 2: 数字处方 ─── */
-  .rx-header {
-    padding: 16px 20px;
-    background: linear-gradient(180deg, #0a2a45 0%, var(--navy) 100%);
-    position: relative;
-    overflow: hidden;
-  }
-  .rx-header::before {
-    content: '';
-    position: absolute;
-    top: -20px; right: -20px;
-    width: 120px; height: 120px;
-    border-radius: 50%;
-    background: radial-gradient(circle, rgba(0,201,184,0.1) 0%, transparent 70%);
-  }
-  .rx-title { font-size: 12px; color: var(--text-dim); margin-bottom: 12px; letter-spacing: 1px; }
-  .patient-info {
-    display: flex; gap: 12px; align-items: flex-start;
-  }
-  .patient-avatar {
-    width: 48px; height: 48px;
-    border-radius: 16px;
-    background: var(--navy-card);
-    border: 2px solid var(--card-border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 22px;
-    flex-shrink: 0;
-  }
-  .patient-name { font-size: 16px; font-weight: 500; }
-  .patient-tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 6px; }
-  .tag {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 6px;
-    font-weight: 500;
-  }
-  .tag-cancer { background: rgba(255,107,107,0.15); color: var(--coral); border: 1px solid rgba(255,107,107,0.3); }
-  .tag-stage { background: rgba(245,200,66,0.12); color: var(--gold); border: 1px solid rgba(245,200,66,0.25); }
-  .tag-drug { background: rgba(0,201,184,0.12); color: var(--teal); border: 1px solid var(--card-border); }
-
-  .day-counter {
-    margin-top: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-  }
-  .day-badge {
-    background: var(--teal);
-    color: var(--navy);
-    font-size: 11px;
-    font-weight: 700;
-    padding: 4px 12px;
-    border-radius: 8px;
-  }
-  .day-bar {
-    flex: 1;
-    height: 4px;
-    background: var(--divider);
-    border-radius: 2px;
-    overflow: hidden;
-  }
-  .day-fill {
-    height: 100%;
-    width: 43%;
-    background: linear-gradient(90deg, var(--teal), var(--blue));
-    border-radius: 2px;
-  }
-  .day-label { font-size: 11px; color: var(--text-dim); }
-
-  .section-label {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-dim);
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    padding: 16px 20px 8px;
-  }
-
-  .today-highlight {
-    margin: 0 16px;
-    background: linear-gradient(135deg, rgba(0,201,184,0.12), rgba(26,143,209,0.08));
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    padding: 16px;
-    cursor: pointer;
-    transition: all 0.2s;
-  }
-  .today-highlight:hover { border-color: var(--teal); }
-  .highlight-top {
-    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
-  }
-  .highlight-icon {
-    width: 36px; height: 36px;
-    border-radius: 12px;
-    background: rgba(255,107,107,0.15);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
-  }
-  .highlight-title { font-size: 15px; font-weight: 500; }
-  .highlight-sub { font-size: 11px; color: var(--coral); }
-  .highlight-desc { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-
-  /* Timeline */
-  .timeline {
-    margin: 0 20px;
-    position: relative;
-  }
-  .timeline-track {
-    position: absolute;
-    left: 12px;
-    top: 4px;
-    bottom: 4px;
-    width: 2px;
-    background: var(--divider);
-  }
-  .timeline-fill {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 42%;
-    background: linear-gradient(180deg, var(--teal), var(--blue));
-  }
-  .tl-item {
-    display: flex;
-    gap: 16px;
-    padding: 8px 0;
-    cursor: pointer;
-  }
-  .tl-dot {
-    width: 26px; height: 26px;
-    border-radius: 50%;
-    background: var(--navy-card);
-    border: 2px solid var(--divider);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 9px; font-weight: 700;
-    flex-shrink: 0;
-    z-index: 1;
-    color: var(--text-dim);
-    transition: all 0.2s;
-  }
-  .tl-dot.active {
-    background: var(--coral);
-    border-color: var(--coral);
-    color: white;
-    box-shadow: 0 0 10px rgba(255,107,107,0.4);
-  }
-  .tl-dot.done { background: var(--teal); border-color: var(--teal); color: var(--navy); }
-  .tl-content { flex: 1; padding-top: 3px; }
-  .tl-day { font-size: 13px; font-weight: 500; }
-  .tl-desc { font-size: 11px; color: var(--text-dim); }
-  .tl-cards { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
-  .tl-card-chip {
-    font-size: 10px;
-    padding: 3px 8px;
-    border-radius: 6px;
-    border: 1px solid;
-    cursor: pointer;
-  }
-  .tl-card-chip.red { background: rgba(255,107,107,0.1); color: var(--coral); border-color: rgba(255,107,107,0.3); }
-  .tl-card-chip.teal { background: rgba(0,201,184,0.1); color: var(--teal); border-color: var(--card-border); }
-  .tl-card-chip.gold { background: rgba(245,200,66,0.1); color: var(--gold); border-color: rgba(245,200,66,0.25); }
-
-  /* ─── SCREEN 3: 知识库 ─── */
-  .kb-header {
-    padding: 16px 20px 12px;
-    background: var(--navy);
-  }
-  .search-bar {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    background: var(--navy-card);
-    border: 1px solid var(--card-border);
-    border-radius: 14px;
-    padding: 10px 14px;
-    margin-top: 8px;
-  }
-  .search-bar input {
-    flex: 1;
-    background: none;
-    border: none;
-    outline: none;
-    font-size: 13px;
-    color: var(--white);
-    font-family: inherit;
-  }
-  .search-bar input::placeholder { color: var(--text-dim); }
-
-  .cat-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    padding: 0 16px;
-  }
-  .cat-card {
-    background: var(--navy-card);
-    border: 1px solid var(--divider);
-    border-radius: 14px;
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    position: relative;
-    overflow: hidden;
-  }
-  .cat-card:hover { border-color: var(--card-border); }
-  .cat-card.wide { grid-column: 1 / -1; }
-  .cat-icon { font-size: 24px; margin-bottom: 8px; }
-  .cat-name { font-size: 13px; font-weight: 500; }
-  .cat-count { font-size: 11px; color: var(--text-dim); margin-top: 2px; }
-  .cat-accent {
-    position: absolute;
-    bottom: -10px; right: -10px;
-    width: 60px; height: 60px;
-    border-radius: 50%;
-    opacity: 0.08;
-  }
-
-  .kcard-list {
-    padding: 0 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding-bottom: 20px;
-  }
-  .kcard {
-    background: var(--navy-card);
-    border: 1px solid var(--divider);
-    border-radius: 14px;
-    padding: 14px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex;
-    gap: 12px;
-    align-items: flex-start;
-  }
-  .kcard:hover { border-color: var(--card-border); transform: translateX(2px); }
-  .kcard-color {
-    width: 4px;
-    border-radius: 2px;
-    align-self: stretch;
-    flex-shrink: 0;
-  }
-  .kcard-body { flex: 1; }
-  .kcard-title { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
-  .kcard-summary { font-size: 12px; color: var(--text-muted); line-height: 1.5; }
-  .kcard-meta { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-  .kcard-tag {
-    font-size: 10px;
-    padding: 2px 8px;
-    border-radius: 5px;
-    background: rgba(255,255,255,0.06);
-    color: var(--text-muted);
-  }
-  .kcard-arrow {
-    width: 20px; height: 20px;
-    border-radius: 6px;
-    background: var(--teal-light);
-    display: flex; align-items: center; justify-content: center;
-    flex-shrink: 0;
-    align-self: center;
-  }
-
-  /* ─── SCREEN 4: 我 ─── */
-  .me-header {
-    padding: 20px 20px 16px;
-    text-align: center;
-    background: linear-gradient(180deg, #0a2a45 0%, var(--navy) 100%);
-  }
-  .me-avatar {
-    width: 72px; height: 72px;
-    border-radius: 24px;
-    background: var(--navy-card);
-    border: 2px solid var(--card-border);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 32px;
-    margin: 0 auto 12px;
-  }
-  .me-name { font-size: 18px; font-weight: 500; }
-  .me-id { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-  .me-stats {
-    display: flex;
-    margin: 16px -1px 0;
-  }
-  .me-stat {
-    flex: 1;
-    text-align: center;
-    padding: 0 8px;
-    border-right: 1px solid var(--divider);
-  }
-  .me-stat:last-child { border-right: none; }
-  .stat-num { font-size: 18px; font-weight: 700; color: var(--teal); }
-  .stat-label { font-size: 10px; color: var(--text-dim); margin-top: 2px; }
-
-  .section-group {
-    margin: 0 16px 16px;
-    background: var(--navy-card);
-    border: 1px solid var(--divider);
-    border-radius: 16px;
-    overflow: hidden;
-  }
-  .section-group-title {
-    font-size: 11px;
-    font-weight: 500;
-    color: var(--text-dim);
-    letter-spacing: 1px;
-    padding: 10px 16px 6px;
-    border-bottom: 1px solid var(--divider);
-  }
-  .menu-item {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 14px 16px;
-    cursor: pointer;
-    border-bottom: 1px solid var(--divider);
-    transition: background 0.15s;
-  }
-  .menu-item:last-child { border-bottom: none; }
-  .menu-item:hover { background: rgba(255,255,255,0.03); }
-  .menu-icon {
-    width: 32px; height: 32px;
-    border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
-    flex-shrink: 0;
-  }
-  .menu-text { flex: 1; }
-  .menu-title { font-size: 14px; }
-  .menu-sub { font-size: 11px; color: var(--text-dim); margin-top: 1px; }
-
-  .menu-chevron { color: var(--text-dim); font-size: 12px; }
-  .menu-badge {
-    background: var(--teal);
-    color: var(--navy);
-    font-size: 10px;
-    font-weight: 700;
-    padding: 2px 7px;
-    border-radius: 6px;
-  }
-
-  /* ─── Knowledge Card Modal ─── */
-  .modal-overlay {
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: rgba(2, 14, 26, 0.88);
-    z-index: 200;
-    display: flex;
-    align-items: flex-end;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.25s;
-  }
-  .modal-overlay.open {
-    opacity: 1;
-    pointer-events: all;
-  }
-  .modal-sheet {
-    background: var(--navy-mid);
-    border-radius: 24px 24px 0 0;
-    border: 1px solid var(--card-border);
-    border-bottom: none;
-    width: 100%;
-    max-height: 85%;
-    overflow-y: auto;
-    transform: translateY(100%);
-    transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
-    scrollbar-width: none;
-  }
-  .modal-sheet::-webkit-scrollbar { display: none; }
-  .modal-overlay.open .modal-sheet { transform: translateY(0); }
-  .modal-handle {
-    width: 36px; height: 4px;
-    background: var(--divider);
-    border-radius: 2px;
-    margin: 12px auto 0;
-  }
-  .modal-header {
-    padding: 16px 20px;
-    border-bottom: 1px solid var(--divider);
-  }
-  .modal-type-tag {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 10px;
-    font-weight: 500;
-    color: var(--teal);
-    background: var(--teal-light);
-    border: 1px solid var(--card-border);
-    border-radius: 6px;
-    padding: 3px 10px;
-    margin-bottom: 8px;
-  }
-  .modal-title { font-size: 20px; font-weight: 700; }
-  .modal-en { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
-  .modal-body { padding: 16px 20px; }
-  .info-row {
-    display: flex;
-    gap: 8px;
-    padding: 10px 0;
-    border-bottom: 1px solid var(--divider);
-    align-items: flex-start;
-  }
-  .info-row:last-of-type { border-bottom: none; }
-  .info-label { font-size: 11px; color: var(--text-dim); width: 70px; flex-shrink: 0; padding-top: 1px; }
-  .info-value { font-size: 13px; line-height: 1.5; flex: 1; }
-  .related-section { margin-top: 16px; }
-  .related-title { font-size: 12px; color: var(--text-dim); margin-bottom: 10px; }
-  .related-chips { display: flex; flex-wrap: wrap; gap: 8px; }
-  .related-chip {
-    background: var(--navy-card);
-    border: 1px solid var(--divider);
-    border-radius: 10px;
-    padding: 8px 14px;
-    font-size: 12px;
-    cursor: pointer;
-    transition: all 0.2s;
-    display: flex; align-items: center; gap: 6px;
-  }
-  .related-chip:hover { border-color: var(--teal); color: var(--teal); }
-  .related-chip-dot { width: 6px; height: 6px; border-radius: 50%; }
-
-  /* Panel on the right side */
-  .side-panel {
-    width: 260px;
-    flex-shrink: 0;
-    display: flex;
-    flex-direction: column;
-    gap: 16px;
-  }
-  .panel-card {
-    background: rgba(13,53,82,0.5);
-    border: 1px solid rgba(0,201,184,0.15);
-    border-radius: 16px;
-    padding: 16px;
-  }
-  .panel-title {
-    font-size: 12px;
-    font-weight: 500;
-    color: var(--teal);
-    letter-spacing: 1px;
-    text-transform: uppercase;
-    margin-bottom: 12px;
-  }
-  .panel-item {
-    display: flex;
-    gap: 8px;
-    padding: 8px 0;
-    border-bottom: 1px solid rgba(255,255,255,0.04);
-    align-items: flex-start;
-    cursor: pointer;
-  }
-  .panel-item:last-child { border-bottom: none; }
-  .panel-num {
-    width: 20px; height: 20px;
-    border-radius: 6px;
-    background: var(--teal-light);
-    display: flex; align-items: center; justify-content: center;
-    font-size: 10px; font-weight: 700;
-    color: var(--teal);
-    flex-shrink: 0;
-  }
-  .panel-text { font-size: 12px; color: var(--text-muted); line-height: 1.4; }
-  .flow-step {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    padding: 6px 0;
-  }
-  .flow-dot {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    margin-top: 4px;
-    flex-shrink: 0;
-  }
-  .flow-line {
-    width: 1px;
-    background: var(--divider);
-    flex-shrink: 0;
-    align-self: stretch;
-  }
-  .legend-item {
-    display: flex;
-    gap: 8px;
-    align-items: center;
-    margin-bottom: 8px;
-  }
-  .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .legend-text { font-size: 12px; color: var(--text-muted); }
-
-  /* Typing indicator */
-  .typing-indicator {
-    display: flex;
-    gap: 4px;
-    padding: 10px 14px;
-    background: var(--navy-card);
-    border: 1px solid var(--card-border);
-    border-radius: 16px;
-    border-bottom-left-radius: 4px;
-    align-items: center;
-    width: fit-content;
-  }
-  .typing-dot {
-    width: 6px; height: 6px;
-    border-radius: 50%;
-    background: var(--text-dim);
-    animation: bounce 1s infinite;
-  }
-  .typing-dot:nth-child(2) { animation-delay: 0.15s; }
-  .typing-dot:nth-child(3) { animation-delay: 0.3s; }
-  @keyframes bounce {
-    0%, 60%, 100% { transform: translateY(0); opacity: 0.5; }
-    30% { transform: translateY(-4px); opacity: 1; }
-  }
-
-  @media (max-width: 720px) {
-    .phone-scene { flex-direction: column; align-items: center; }
-    .side-panel { width: 375px; }
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Job Agent API 调试页</title>
+  <style>
+    :root {
+      color-scheme: light;
+      font-family: Arial, "Microsoft YaHei", sans-serif;
+    }
+    body {
+      margin: 0;
+      background: #f6f7fb;
+      color: #1f2937;
+    }
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+    }
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+    }
+    .desc {
+      margin: 0 0 20px;
+      color: #4b5563;
+    }
+    .card {
+      background: #fff;
+      border: 1px solid #e5e7eb;
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 16px;
+      box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+    label {
+      font-size: 14px;
+      color: #374151;
+      font-weight: 600;
+    }
+    input, textarea, select {
+      width: 100%;
+      box-sizing: border-box;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      padding: 10px 12px;
+      font-size: 14px;
+      background: #fff;
+    }
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+      font-family: Consolas, monospace;
+    }
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    button {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      background: #2563eb;
+      color: #fff;
+    }
+    button.secondary {
+      background: #4b5563;
+    }
+    button.warn {
+      background: #b45309;
+    }
+    button:hover {
+      opacity: 0.92;
+    }
+    .small {
+      font-size: 12px;
+      color: #6b7280;
+    }
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      background: #0f172a;
+      color: #e5e7eb;
+      padding: 16px;
+      border-radius: 12px;
+      min-height: 320px;
+      overflow: auto;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+    .status {
+      margin-bottom: 10px;
+      font-size: 14px;
+      font-weight: 700;
+    }
+    .ok { color: #15803d; }
+    .err { color: #b91c1c; }
+  </style>
 </head>
 <body>
+  <div class="container">
+    <h1>Job Agent API 调试页</h1>
+    <p class="desc">直接调用你的后端接口，并在页面里显示原始 JSON 文本。</p>
 
-<div class="page-header">
-  <div class="logo">CuraNav · 治愈导航</div>
-  <div class="sub">Interactive Mobile Prototype · 移动端产品原型</div>
-</div>
-
-<div class="phone-scene">
-
-  <!-- ── PHONE ── -->
-  <div class="phone-frame">
-
-    <div class="phone-notch">
-      <div class="notch-cam"></div>
-      <div class="notch-dot"></div>
-    </div>
-
-    <!-- Status bar -->
-    <div class="status-bar">
-      <span>9:41</span>
-      <span style="color:var(--teal);font-size:12px;">CuraNav</span>
-      <span>●●●</span>
-    </div>
-
-    <!-- Screen Container -->
-    <div class="screen-container">
-
-      <!-- ── SCREEN 1: AI问答 ── -->
-      <div class="screen active" id="screen-chat">
-        <div class="chat-header">
-          <div class="chat-header-top">
-            <div style="display:flex;align-items:center;gap:10px;">
-              <div class="ai-avatar">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z" fill="white" opacity="0.9"/>
-                  <path d="M8 12c0-2.21 1.79-4 4-4s4 1.79 4 4-1.79 4-4 4-4-1.79-4-4z" fill="#00C9B8"/>
-                </svg>
-              </div>
-              <div>
-                <div class="ai-name">CuraNav AI 助手</div>
-                <div class="ai-status"><span class="status-dot"></span>在线</div>
-              </div>
-            </div>
-            <button class="upload-btn" onclick="handleUpload()">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
-                <polyline points="17 8 12 3 7 8"/>
-                <line x1="12" y1="3" x2="12" y2="15"/>
-              </svg>
-              上传报告
-            </button>
-          </div>
-          <div class="quick-chips" style="margin-top:10px;">
-            <button class="chip" onclick="sendQuickMsg('EGFR突变是什么意思？')">EGFR突变</button>
-            <button class="chip" onclick="sendQuickMsg('奥希替尼副作用有哪些？')">药物副作用</button>
-            <button class="chip" onclick="sendQuickMsg('化疗期间饮食注意什么？')">饮食指南</button>
-            <button class="chip" onclick="sendQuickMsg('白细胞低怎么办？')">白细胞低</button>
-          </div>
-        </div>
-
-        <div class="chat-messages" id="chat-messages">
-          <!-- Initial AI message -->
-          <div class="msg-row ai">
-            <div class="msg-avatar" style="background:linear-gradient(135deg,#00796B,#0288D1);">AI</div>
-            <div>
-              <div class="msg-bubble">
-                你好 👋 我是 CuraNav AI 助手。<br>你可以问我任何关于癌症诊疗的问题，或者上传报告让我帮你解读。
-              </div>
-            </div>
-          </div>
-
-          <!-- User message -->
-          <div class="msg-row user">
-            <div class="msg-bubble">EGFR突变严重吗？</div>
-            <div class="msg-avatar" style="background:linear-gradient(135deg,#1A5276,#2E86C1);">我</div>
-          </div>
-
-          <!-- AI reply with knowledge cards -->
-          <div class="msg-row ai">
-            <div class="msg-avatar" style="background:linear-gradient(135deg,#00796B,#0288D1);">AI</div>
-            <div>
-              <div class="msg-bubble">
-                EGFR突变是肺腺癌中最常见的基因突变之一，约占中国肺癌患者的 <strong>50%</strong>。<br><br>它的存在通常是个 <strong style="color:var(--teal)">好消息</strong>，意味着你对靶向治疗（如奥希替尼）高度敏感，治疗效果通常优于化疗。
-              </div>
-              <div class="citation-tag">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
-                NCCN 指南 v2024 · FLAURA 临床试验
-              </div>
-              <div class="knowledge-chips-row">
-                <button class="k-chip" onclick="openCard('egfr')">EGFR突变</button>
-                <button class="k-chip" onclick="openCard('targeted')">靶向治疗</button>
-                <button class="k-chip" onclick="openCard('osimertinib')">奥希替尼</button>
-                <button class="k-chip" onclick="openCard('resistance')">耐药机制</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div class="chat-input-area">
-          <input class="chat-input" id="chat-input" type="text" placeholder="问我任何诊疗问题..." onkeydown="handleEnter(event)">
-          <button class="send-btn" onclick="sendMessage()">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-          </button>
-        </div>
+    <div class="card">
+      <div class="field">
+        <label for="baseUrl">后端 Base URL</label>
+        <input id="baseUrl" value="https://job-agent-api-asia-102039125042.asia-southeast1.run.app" />
+        <div class="small">不要带最后的斜杠。</div>
       </div>
-
-      <!-- ── SCREEN 2: 数字处方 ── -->
-      <div class="screen" id="screen-rx">
-        <div class="rx-header">
-          <div class="rx-title">我的数字处方</div>
-          <div class="patient-info">
-            <div class="patient-avatar">👩</div>
-            <div>
-              <div class="patient-name">李女士</div>
-              <div class="patient-tags">
-                <span class="tag tag-cancer">肺腺癌</span>
-                <span class="tag tag-stage">III期</span>
-                <span class="tag tag-drug">奥希替尼</span>
-              </div>
-            </div>
-          </div>
-          <div class="day-counter">
-            <div class="day-badge">D30</div>
-            <div class="day-bar"><div class="day-fill"></div></div>
-            <div class="day-label">靶向治疗 第30天</div>
-          </div>
-        </div>
-
-        <div class="section-label">今日重点</div>
-        <div class="today-highlight" onclick="openCard('diarrhea')">
-          <div class="highlight-top">
-            <div class="highlight-icon">🌡️</div>
-            <div>
-              <div class="highlight-title">腹泻管理</div>
-              <div class="highlight-sub">靶向治疗 · 高发副作用</div>
-            </div>
-          </div>
-          <div class="highlight-desc">奥希替尼引发腹泻发生率约24%。D28-42是副作用高发期，了解分级管理方法。</div>
-        </div>
-
-        <div class="section-label">治疗时间轴</div>
-        <div class="timeline" style="padding-bottom:16px;">
-          <div class="timeline-track"><div class="timeline-fill"></div></div>
-
-          <div class="tl-item">
-            <div class="tl-dot done">D1</div>
-            <div class="tl-content">
-              <div class="tl-day">治疗开始</div>
-              <div class="tl-desc">奥希替尼 80mg 每日一次</div>
-              <div class="tl-cards">
-                <span class="tl-card-chip teal" onclick="openCard('osimertinib')">用药说明</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot done">D7</div>
-            <div class="tl-content">
-              <div class="tl-day">副作用初现</div>
-              <div class="tl-desc">皮肤反应、腹泻初期</div>
-              <div class="tl-cards">
-                <span class="tl-card-chip red" onclick="openCard('skin')">皮疹护理</span>
-                <span class="tl-card-chip red" onclick="openCard('diarrhea')">腹泻管理</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot active">D30</div>
-            <div class="tl-content">
-              <div class="tl-day">当前阶段 📍</div>
-              <div class="tl-desc">靶向治疗高峰期</div>
-              <div class="tl-cards">
-                <span class="tl-card-chip red" onclick="openCard('diarrhea')">腹泻管理</span>
-                <span class="tl-card-chip gold" onclick="openCard('nutrition')">营养补充</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot">D42</div>
-            <div class="tl-content">
-              <div class="tl-day">复查节点</div>
-              <div class="tl-desc">CT + 血液指标复查</div>
-              <div class="tl-cards">
-                <span class="tl-card-chip teal" onclick="openCard('ct')">CT报告解读</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="tl-item">
-            <div class="tl-dot">D90</div>
-            <div class="tl-content">
-              <div class="tl-day">疗效评估</div>
-              <div class="tl-desc">首次疗效评估 PFS 追踪</div>
-              <div class="tl-cards">
-                <span class="tl-card-chip gold" onclick="openCard('resistance')">耐药监测</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── SCREEN 3: 知识库 ── -->
-      <div class="screen" id="screen-kb">
-        <div class="kb-header">
-          <div style="font-size:18px;font-weight:500;">癌症知识库</div>
-          <div class="search-bar">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-            <input type="text" placeholder="搜索：EGFR、奥希替尼、白细胞...">
-          </div>
-        </div>
-
-        <div class="section-label">分类浏览</div>
-        <div class="cat-grid">
-          <div class="cat-card" onclick="openCard('lung')">
-            <div class="cat-icon">🫁</div>
-            <div class="cat-name">癌症类型</div>
-            <div class="cat-count">32个知识卡片</div>
-            <div class="cat-accent" style="background:var(--coral);"></div>
-          </div>
-          <div class="cat-card" onclick="openCard('targeted')">
-            <div class="cat-icon">💊</div>
-            <div class="cat-name">治疗方式</div>
-            <div class="cat-count">41个知识卡片</div>
-            <div class="cat-accent" style="background:var(--teal);"></div>
-          </div>
-          <div class="cat-card" onclick="openCard('osimertinib')">
-            <div class="cat-icon">🧬</div>
-            <div class="cat-name">药物</div>
-            <div class="cat-count">58个知识卡片</div>
-            <div class="cat-accent" style="background:var(--blue);"></div>
-          </div>
-          <div class="cat-card" onclick="openCard('diarrhea')">
-            <div class="cat-icon">⚡</div>
-            <div class="cat-name">副作用</div>
-            <div class="cat-count">29个知识卡片</div>
-            <div class="cat-accent" style="background:var(--gold);"></div>
-          </div>
-          <div class="cat-card wide" onclick="openCard('ct')">
-            <div style="display:flex;align-items:center;gap:12px;">
-              <div class="cat-icon" style="font-size:28px;">📋</div>
-              <div>
-                <div class="cat-name" style="font-size:14px;">检查与指标</div>
-                <div class="cat-count">36个知识卡片 · 报告解读指南</div>
-              </div>
-            </div>
-            <div class="cat-accent" style="background:var(--mint);"></div>
-          </div>
-        </div>
-
-        <div class="section-label" style="margin-top:4px;">热门知识</div>
-        <div class="kcard-list">
-          <div class="kcard" onclick="openCard('egfr')">
-            <div class="kcard-color" style="background:var(--teal);"></div>
-            <div class="kcard-body">
-              <div class="kcard-title">EGFR突变</div>
-              <div class="kcard-summary">肺腺癌中最常见的靶点突变，中国患者发生率约50%，是靶向治疗的重要依据。</div>
-              <div class="kcard-meta">
-                <span class="kcard-tag">基因突变</span>
-                <span class="kcard-tag">肺癌</span>
-              </div>
-            </div>
-            <div class="kcard-arrow">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-
-          <div class="kcard" onclick="openCard('osimertinib')">
-            <div class="kcard-color" style="background:var(--blue);"></div>
-            <div class="kcard-body">
-              <div class="kcard-title">奥希替尼</div>
-              <div class="kcard-summary">第三代EGFR-TKI，一线治疗ORR约77%，可穿透血脑屏障，脑转移患者首选。</div>
-              <div class="kcard-meta">
-                <span class="kcard-tag">靶向药</span>
-                <span class="kcard-tag">EGFR抑制剂</span>
-                <span class="kcard-tag">国家医保</span>
-              </div>
-            </div>
-            <div class="kcard-arrow">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-
-          <div class="kcard" onclick="openCard('diarrhea')">
-            <div class="kcard-color" style="background:var(--coral);"></div>
-            <div class="kcard-body">
-              <div class="kcard-title">腹泻管理</div>
-              <div class="kcard-summary">靶向治疗常见副作用，CTCAE分级管理，G1-2可居家处理，G3以上需就医。</div>
-              <div class="kcard-meta">
-                <span class="kcard-tag">副作用</span>
-                <span class="kcard-tag">靶向治疗</span>
-              </div>
-            </div>
-            <div class="kcard-arrow">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-
-          <div class="kcard" onclick="openCard('resistance')">
-            <div class="kcard-color" style="background:var(--gold);"></div>
-            <div class="kcard-body">
-              <div class="kcard-title">耐药机制</div>
-              <div class="kcard-summary">奥希替尼耐药主要通过C797S突变等途径，需再次基因检测明确后续方案。</div>
-              <div class="kcard-meta">
-                <span class="kcard-tag">耐药</span>
-                <span class="kcard-tag">基因突变</span>
-              </div>
-            </div>
-            <div class="kcard-arrow">
-              <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2.5"><polyline points="9 18 15 12 9 6"/></svg>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ── SCREEN 4: 我 ── -->
-      <div class="screen" id="screen-me">
-        <div class="me-header">
-          <div class="me-avatar">👩</div>
-          <div class="me-name">李女士</div>
-          <div class="me-id">ID: CN-2024-08821</div>
-          <div class="me-stats">
-            <div class="me-stat">
-              <div class="stat-num">30</div>
-              <div class="stat-label">治疗天数</div>
-            </div>
-            <div class="me-stat">
-              <div class="stat-num">12</div>
-              <div class="stat-label">已读卡片</div>
-            </div>
-            <div class="me-stat">
-              <div class="stat-num">3</div>
-              <div class="stat-label">上传报告</div>
-            </div>
-          </div>
-        </div>
-
-        <div style="padding:16px 0 0;">
-          <div class="section-group">
-            <div class="section-group-title">我的诊疗信息</div>
-            <div class="menu-item">
-              <div class="menu-icon" style="background:rgba(255,107,107,0.12);">🫁</div>
-              <div class="menu-text">
-                <div class="menu-title">肺腺癌 · III期</div>
-                <div class="menu-sub">确诊：2024年8月 · 主治：北京肿瘤医院</div>
-              </div>
-              <span class="menu-chevron">›</span>
-            </div>
-            <div class="menu-item">
-              <div class="menu-icon" style="background:rgba(0,201,184,0.12);">💊</div>
-              <div class="menu-text">
-                <div class="menu-title">靶向治疗 · 奥希替尼 80mg</div>
-                <div class="menu-sub">每日一次 · 开始：2024年10月</div>
-              </div>
-              <span class="menu-chevron">›</span>
-            </div>
-            <div class="menu-item">
-              <div class="menu-icon" style="background:rgba(26,143,209,0.12);">🧬</div>
-              <div class="menu-text">
-                <div class="menu-title">EGFR Exon 19缺失</div>
-                <div class="menu-sub">基因检测：阳性 · 2024年8月</div>
-              </div>
-              <span class="menu-chevron">›</span>
-            </div>
-          </div>
-
-          <div class="section-group">
-            <div class="section-group-title">医疗报告</div>
-            <div class="menu-item">
-              <div class="menu-icon" style="background:rgba(245,200,66,0.12);">📄</div>
-              <div class="menu-text">
-                <div class="menu-title">CT报告 · 2024年11月</div>
-                <div class="menu-sub">已解析 · 病灶较前缩小</div>
-              </div>
-              <span class="menu-badge">已读</span>
-            </div>
-            <div class="menu-item">
-              <div class="menu-icon" style="background:rgba(245,200,66,0.12);">📄</div>
-              <div class="menu-text">
-                <div class="menu-title">病理报告 · 2024年8月</div>
-                <div class="menu-sub">已解析 · 肺腺癌确诊</div>
-              </div>
-              <span class="menu-badge">已读</span>
-            </div>
-            <div class="menu-item" onclick="handleUpload()">
-              <div class="menu-icon" style="background:rgba(0,201,184,0.12);">➕</div>
-              <div class="menu-text">
-                <div class="menu-title" style="color:var(--teal);">上传新报告</div>
-              </div>
-              <span class="menu-chevron">›</span>
-            </div>
-          </div>
-
-          <div class="section-group">
-            <div class="section-group-title">账户设置</div>
-            <div class="menu-item">
-              <div class="menu-icon" style="background:rgba(255,255,255,0.06);">🔔</div>
-              <div class="menu-text"><div class="menu-title">通知设置</div></div>
-              <span class="menu-chevron">›</span>
-            </div>
-            <div class="menu-item">
-              <div class="menu-icon" style="background:rgba(0,201,184,0.12);">⭐</div>
-              <div class="menu-text">
-                <div class="menu-title">升级 Pro</div>
-                <div class="menu-sub">解锁全部深度知识内容</div>
-              </div>
-              <div class="menu-badge" style="background:var(--gold);color:var(--navy);">PRO</div>
-            </div>
-            <div class="menu-item">
-              <div class="menu-icon" style="background:rgba(255,255,255,0.06);">🔒</div>
-              <div class="menu-text"><div class="menu-title">隐私与数据</div></div>
-              <span class="menu-chevron">›</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div><!-- /screen-container -->
-
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-      <div class="nav-item active" id="nav-chat" onclick="switchTab('chat')">
-        <div class="nav-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="var(--teal)" stroke-width="2">
-            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
-          </svg>
-        </div>
-        <span class="nav-label">AI问答</span>
-      </div>
-      <div class="nav-item" id="nav-rx" onclick="switchTab('rx')">
-        <div class="nav-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2">
-            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
-            <line x1="16" y1="2" x2="16" y2="6"/>
-            <line x1="8" y1="2" x2="8" y2="6"/>
-            <line x1="3" y1="10" x2="21" y2="10"/>
-          </svg>
-        </div>
-        <span class="nav-label">数字处方</span>
-      </div>
-      <div class="nav-item" id="nav-kb" onclick="switchTab('kb')">
-        <div class="nav-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2">
-            <path d="M4 19.5A2.5 2.5 0 016.5 17H20"/>
-            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/>
-          </svg>
-        </div>
-        <span class="nav-label">知识库</span>
-      </div>
-      <div class="nav-item" id="nav-me" onclick="switchTab('me')">
-        <div class="nav-icon">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="2">
-            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
-            <circle cx="12" cy="7" r="4"/>
-          </svg>
-        </div>
-        <span class="nav-label">我</span>
+      <div class="btn-row">
+        <button class="secondary" onclick="callGet('/health')">GET /health</button>
+        <button class="secondary" onclick="callGet('/api/jobs/latest?limit=5')">GET /api/jobs/latest</button>
+        <button class="secondary" onclick="callGet(buildSearchUrl())">GET /api/jobs/search</button>
       </div>
     </div>
 
-    <!-- Knowledge Card Modal (bottom sheet) -->
-    <div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-      <div class="modal-sheet" id="modal-sheet">
-        <div class="modal-handle"></div>
-        <div class="modal-header" id="modal-header"></div>
-        <div class="modal-body" id="modal-body"></div>
+    <div class="grid">
+      <div class="card">
+        <h3>搜索职位</h3>
+        <div class="field">
+          <label for="keyword">keyword</label>
+          <input id="keyword" placeholder="例如 unity" />
+        </div>
+        <div class="field">
+          <label for="companyName">companyName</label>
+          <input id="companyName" placeholder="例如 Databricks" />
+        </div>
+        <div class="field">
+          <label for="workMode">workMode</label>
+          <input id="workMode" placeholder="remote / hybrid / onsite" />
+        </div>
+        <div class="field">
+          <label for="seniorityLevel">seniorityLevel</label>
+          <input id="seniorityLevel" placeholder="junior / mid / senior" />
+        </div>
+        <div class="field">
+          <label for="analysisStatus">analysisStatus</label>
+          <input id="analysisStatus" placeholder="pending / completed / failed" />
+        </div>
+        <div class="field">
+          <label for="searchLimit">limit</label>
+          <input id="searchLimit" value="20" />
+        </div>
+        <div class="btn-row">
+          <button onclick="callGet(buildSearchUrl())">查询</button>
+        </div>
       </div>
-    </div>
 
-  </div><!-- /phone-frame -->
+      <div class="card">
+        <h3>单条 URL 导入</h3>
+        <div class="field">
+          <label for="jobUrl">职位 URL</label>
+          <input id="jobUrl" placeholder="https://..." />
+        </div>
+        <div class="field">
+          <label for="sourceType">sourceType</label>
+          <input id="sourceType" value="manual_url" />
+        </div>
+        <div class="field">
+          <label for="notes">notes</label>
+          <input id="notes" value="前端页面测试" />
+        </div>
+        <div class="btn-row">
+          <button onclick="importFromUrl()">POST /api/job-imports/from-url</button>
+        </div>
+      </div>
 
-  <!-- ── SIDE PANEL ── -->
-  <div class="side-panel">
+      <div class="card">
+        <h3>Greenhouse 批量导入</h3>
+        <div class="field">
+          <label for="greenhouseBoardToken">boardToken</label>
+          <input id="greenhouseBoardToken" value="databricks" />
+        </div>
+        <div class="btn-row">
+          <button onclick="importFromGreenhouse()">POST /api/job-imports/from-greenhouse</button>
+        </div>
+      </div>
 
-    <div class="panel-card">
-      <div class="panel-title">产品架构说明</div>
-      <div class="flow-step">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
-          <div class="flow-dot" style="background:var(--teal);"></div>
-          <div style="width:1px;height:28px;background:var(--divider);margin:3px 0;"></div>
+      <div class="card">
+        <h3>Lever 批量导入</h3>
+        <div class="field">
+          <label for="leverCompany">company</label>
+          <input id="leverCompany" value="spotify" />
         </div>
-        <div style="padding-top:0;padding-left:6px;">
-          <div style="font-size:12px;font-weight:500;color:var(--white);">AI问答（被动触达）</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">报告解析 · 意图识别 · 知识卡片挂载</div>
+        <div class="btn-row">
+          <button onclick="importFromLever()">POST /api/job-imports/from-lever</button>
         </div>
       </div>
-      <div class="flow-step">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
-          <div class="flow-dot" style="background:var(--coral);"></div>
-          <div style="width:1px;height:28px;background:var(--divider);margin:3px 0;"></div>
+
+      <div class="card">
+        <h3>Ashby 批量导入</h3>
+        <div class="field">
+          <label for="ashbySlug">organizationSlug</label>
+          <input id="ashbySlug" value="notion" />
         </div>
-        <div style="padding-left:6px;">
-          <div style="font-size:12px;font-weight:500;color:var(--white);">数字处方（动态推送）</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">按治疗阶段推荐 · 时间轴驱动</div>
-        </div>
-      </div>
-      <div class="flow-step">
-        <div style="display:flex;flex-direction:column;align-items:center;gap:0;">
-          <div class="flow-dot" style="background:var(--blue);"></div>
-          <div style="width:1px;height:28px;background:var(--divider);margin:3px 0;"></div>
-        </div>
-        <div style="padding-left:6px;">
-          <div style="font-size:12px;font-weight:500;color:var(--white);">知识库（主动探索）</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;">图谱化节点 · 无限下钻</div>
+        <div class="btn-row">
+          <button onclick="importFromAshby()">POST /api/job-imports/from-ashby</button>
         </div>
       </div>
-      <div class="flow-step">
-        <div style="padding-left:20px;">
-          <div class="flow-dot" style="background:var(--gold);display:inline-block;"></div>
-          <div style="font-size:12px;font-weight:500;color:var(--white);display:inline;margin-left:10px;">患者状态（个性化驱动）</div>
-          <div style="font-size:11px;color:var(--text-dim);margin-top:2px;padding-left:0px;">录入信息 · 影响全部推荐</div>
+
+      <div class="card">
+        <h3>单条职位分析</h3>
+        <div class="field">
+          <label for="analysisJobId">jobId</label>
+          <input id="analysisJobId" placeholder="从 jobs/search 结果里复制 id" />
+        </div>
+        <div class="btn-row">
+          <button onclick="runSingleAnalysis()">POST /api/job-analyses/{jobId}/run</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>批量分析待处理职位</h3>
+        <div class="field">
+          <label for="pendingLimit">limit</label>
+          <input id="pendingLimit" value="10" />
+        </div>
+        <div class="btn-row">
+          <button onclick="runPendingAnalysis()">POST /api/job-analyses/run-pending</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>统一调度入口</h3>
+        <div class="field">
+          <label for="scheduleBody">POST /api/schedules/run 的请求体</label>
+          <textarea id="scheduleBody">{
+  "runGreenhouse": true,
+  "greenhouseBoardTokens": ["databricks"],
+  "runLever": true,
+  "leverCompanies": ["spotify"],
+  "runAshby": true,
+  "ashbyOrganizationSlugs": ["notion"],
+  "analyzeAfterImport": true
+}</textarea>
+        </div>
+        <div class="btn-row">
+          <button class="warn" onclick="runSchedule()">POST /api/schedules/run</button>
         </div>
       </div>
     </div>
 
-    <div class="panel-card">
-      <div class="panel-title">知识卡片系统</div>
-      <div style="font-size:11px;color:var(--text-dim);margin-bottom:10px;">点击界面中任意卡片标签可查看完整知识卡片</div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--teal);"></div>
-        <div class="legend-text">基础概念（疾病·基因·检查）</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--blue);"></div>
-        <div class="legend-text">药物信息（适应症·用法·医保）</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--coral);"></div>
-        <div class="legend-text">副作用管理（分级·处理·就医）</div>
-      </div>
-      <div class="legend-item">
-        <div class="legend-dot" style="background:var(--gold);"></div>
-        <div class="legend-text">康复支持（营养·心理·随访）</div>
+    <div class="card">
+      <div id="status" class="status">状态：等待调用</div>
+      <pre id="output">这里会显示接口返回的原始 JSON 文本。</pre>
+      <div class="btn-row">
+        <button class="secondary" onclick="clearOutput()">清空输出</button>
       </div>
     </div>
-
-    <div class="panel-card">
-      <div class="panel-title">交互提示</div>
-      <div class="panel-item" onclick="switchTab('chat')">
-        <div class="panel-num">1</div>
-        <div class="panel-text">点击底部导航切换四个模块</div>
-      </div>
-      <div class="panel-item" onclick="openCard('egfr')">
-        <div class="panel-num">2</div>
-        <div class="panel-text">点击青色标签打开知识卡片</div>
-      </div>
-      <div class="panel-item" onclick="switchTab('chat');setTimeout(()=>sendQuickMsg('奥希替尼副作用有哪些？'),300)">
-        <div class="panel-num">3</div>
-        <div class="panel-text">在AI问答中发送快捷提问</div>
-      </div>
-      <div class="panel-item" onclick="switchTab('rx')">
-        <div class="panel-num">4</div>
-        <div class="panel-text">数字处方查看病程时间轴</div>
-      </div>
-    </div>
-
   </div>
 
-</div><!-- /phone-scene -->
+  <script>
+    function getBaseUrl() {
+      return document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
+    }
 
-<script>
-const knowledgeCards = {
-  egfr: {
-    type: '基因突变 · 肺癌',
-    title: 'EGFR突变',
-    en: 'Epidermal Growth Factor Receptor Mutation',
-    color: '#00C9B8',
-    rows: [
-      ['一句话', 'EGFR是肺腺癌最常见的驱动基因突变，中国患者发生率约50%。'],
-      ['为什么重要', '阳性意味着可以使用靶向药物治疗，效果通常优于化疗。'],
-      ['主要类型', 'Exon 19缺失（45%）· Exon 21 L858R点突变（40%）'],
-      ['推荐治疗', '奥希替尼（三代）· 厄洛替尼·吉非替尼（一代）'],
-      ['来源', 'NCCN指南 v2024 · FLAURA临床试验'],
-    ],
-    related: [
-      { name: '靶向治疗', color: '#00C9B8', id: 'targeted' },
-      { name: '奥希替尼', color: '#1A8FD1', id: 'osimertinib' },
-      { name: '耐药机制', color: '#F5C842', id: 'resistance' },
-      { name: '基因检测', color: '#1A8FD1', id: 'ct' },
-    ]
-  },
-  osimertinib: {
-    type: '靶向药物 · 第三代EGFR-TKI',
-    title: '奥希替尼',
-    en: 'Osimertinib / Tagrisso®',
-    color: '#1A8FD1',
-    rows: [
-      ['适应症', 'EGFR突变阳性晚期NSCLC（一线/二线）'],
-      ['用法用量', '80mg 每日一次，空腹或餐后服用'],
-      ['一线ORR', '约77%（FLAURA试验，vs. 一代TKI 69%）'],
-      ['主要副作用', '腹泻（24%）· 皮疹（20%）· 甲沟炎 · QT延长'],
-      ['优势', '可穿透血脑屏障，脑转移患者首选'],
-      ['医保状态', '✅ 国家医保 2024年目录，大幅降价'],
-    ],
-    related: [
-      { name: 'EGFR突变', color: '#00C9B8', id: 'egfr' },
-      { name: '腹泻管理', color: '#FF6B6B', id: 'diarrhea' },
-      { name: '皮疹护理', color: '#FF6B6B', id: 'skin' },
-      { name: '耐药机制', color: '#F5C842', id: 'resistance' },
-    ]
-  },
-  targeted: {
-    type: '治疗方式 · 精准医学',
-    title: '靶向治疗',
-    en: 'Targeted Therapy',
-    color: '#00C9B8',
-    rows: [
-      ['核心原理', '针对癌细胞特定分子靶点（如EGFR、ALK）的精准打击'],
-      ['优势', '副作用少于化疗，特定患者效果显著'],
-      ['适用条件', '需通过基因检测找到驱动突变'],
-      ['常见药物', '奥希替尼（EGFR）· 阿来替尼（ALK）· 克唑替尼（MET）'],
-      ['局限性', '可能出现耐药，需定期复查'],
-    ],
-    related: [
-      { name: 'EGFR突变', color: '#00C9B8', id: 'egfr' },
-      { name: '奥希替尼', color: '#1A8FD1', id: 'osimertinib' },
-      { name: '耐药机制', color: '#F5C842', id: 'resistance' },
-    ]
-  },
-  resistance: {
-    type: '治疗挑战 · 基因突变',
-    title: '耐药机制',
-    en: 'Drug Resistance Mechanisms',
-    color: '#F5C842',
-    rows: [
-      ['发生时间', '三代TKI中位耐药时间约18-19个月'],
-      ['主要机制', 'C797S突变（约25%）· MET扩增 · SCLC转化'],
-      ['发现方式', '液体活检（ctDNA）· 组织再活检'],
-      ['后续方案', '需根据耐药机制个体化选择，可考虑临床试验'],
-      ['重要提示', '出现耐药不代表治疗失败，需积极寻找下一步方案'],
-    ],
-    related: [
-      { name: 'EGFR突变', color: '#00C9B8', id: 'egfr' },
-      { name: '奥希替尼', color: '#1A8FD1', id: 'osimertinib' },
-      { name: '基因检测', color: '#1A8FD1', id: 'ct' },
-    ]
-  },
-  diarrhea: {
-    type: '副作用管理 · 靶向治疗',
-    title: '腹泻管理',
-    en: 'Diarrhea Management',
-    color: '#FF6B6B',
-    rows: [
-      ['发生率', '奥希替尼相关腹泻约24%，多为G1-2级'],
-      ['G1级处理', '每日腹泻<4次：多喝水 · 低纤维饮食 · 避免生冷'],
-      ['G2级处理', '每日4-6次：洛哌丁胺（易蒙停）· 告知主治医生'],
-      ['G3以上', '每日≥7次：需暂停用药，立即就医'],
-      ['预防建议', '避免油腻辛辣 · 益生菌补充 · 记录大便次数'],
-    ],
-    related: [
-      { name: '奥希替尼', color: '#1A8FD1', id: 'osimertinib' },
-      { name: '营养补充', color: '#F5C842', id: 'nutrition' },
-    ]
-  },
-  skin: {
-    type: '副作用管理 · 皮肤毒性',
-    title: '皮疹护理',
-    en: 'Rash Management',
-    color: '#FF6B6B',
-    rows: [
-      ['发生率', '约20%，通常发生于治疗2-4周内'],
-      ['常见部位', '面部（额头、鼻周）· 躯干 · 甲沟'],
-      ['日常护理', '温和保湿（不含酒精）· 防晒SPF30+ · 避免抓挠'],
-      ['G2处理', '外用激素软膏（地塞米松）· 口服多西环素'],
-      ['就医指征', '出现破溃、感染、高热立即就医'],
-    ],
-    related: [
-      { name: '奥希替尼', color: '#1A8FD1', id: 'osimertinib' },
-      { name: '腹泻管理', color: '#FF6B6B', id: 'diarrhea' },
-    ]
-  },
-  nutrition: {
-    type: '康复支持 · 营养管理',
-    title: '营养补充',
-    en: 'Nutritional Support',
-    color: '#F5C842',
-    rows: [
-      ['蛋白质', '每公斤体重1.2-1.5g，优先鱼肉蛋奶'],
-      ['热量需求', '比正常人高20%，避免体重过度下降'],
-      ['推荐食物', '低纤维期（腹泻时）: 白米粥 · 软面条 · 香蕉'],
-      ['补充剂', 'B族维生素 · 维生素D · 益生菌'],
-      ['禁忌', '避免葡萄柚（影响药物代谢）· 减少生冷食物'],
-    ],
-    related: [
-      { name: '腹泻管理', color: '#FF6B6B', id: 'diarrhea' },
-    ]
-  },
-  ct: {
-    type: '检查解读 · 影像报告',
-    title: 'CT报告解读',
-    en: 'CT Scan Report Interpretation',
-    color: '#1A8FD1',
-    rows: [
-      ['关键指标', '最大病灶直径 · 密度（GGO vs 实性）· 淋巴结'],
-      ['疗效评估', 'CR（完全缓解）· PR（部分缓解，缩小≥30%）· SD（稳定）'],
-      ['评估时机', '通常治疗6-8周后第一次复查CT'],
-      ['注意事项', '对比增强CT更准确，同一医院比对更准确'],
-      ['肿瘤标志物', 'CEA · CA125配合CT综合判断疗效'],
-    ],
-    related: [
-      { name: 'EGFR突变', color: '#00C9B8', id: 'egfr' },
-      { name: '耐药机制', color: '#F5C842', id: 'resistance' },
-    ]
-  },
-  lung: {
-    type: '癌症类型 · 胸部肿瘤',
-    title: '肺癌',
-    en: 'Lung Cancer',
-    color: '#FF6B6B',
-    rows: [
-      ['发病率', '中国发病率第一的癌症，每年新发病例约82万'],
-      ['分类', 'NSCLC（约85%）: 腺癌·鳞癌·大细胞；SCLC（约15%）'],
-      ['肺腺癌特点', 'EGFR突变多见，靶向治疗效果好'],
-      ['早期筛查', '推荐40岁以上高危人群每年低剂量CT筛查'],
-      ['总体预后', '早期5年生存率>90%，晚期靶向治疗大幅改善预后'],
-    ],
-    related: [
-      { name: 'EGFR突变', color: '#00C9B8', id: 'egfr' },
-      { name: '靶向治疗', color: '#00C9B8', id: 'targeted' },
-      { name: 'CT报告解读', color: '#1A8FD1', id: 'ct' },
-    ]
-  }
-};
+    function setStatus(text, isError = false) {
+      const status = document.getElementById('status');
+      status.textContent = text;
+      status.className = 'status ' + (isError ? 'err' : 'ok');
+    }
 
-function switchTab(tab) {
-  ['chat','rx','kb','me'].forEach(t => {
-    document.getElementById('screen-' + t).classList.toggle('active', t === tab);
-    const navEl = document.getElementById('nav-' + t);
-    navEl.classList.toggle('active', t === tab);
-    const svg = navEl.querySelector('svg');
-    svg.setAttribute('stroke', t === tab ? 'var(--teal)' : 'rgba(255,255,255,0.4)');
-  });
-}
+    function setOutput(data) {
+      const output = document.getElementById('output');
+      if (typeof data === 'string') {
+        output.textContent = data;
+        return;
+      }
+      output.textContent = JSON.stringify(data, null, 2);
+    }
 
-function openCard(id) {
-  const card = knowledgeCards[id];
-  if (!card) return;
-  document.getElementById('modal-header').innerHTML = `
-    <div class="modal-type-tag">
-      <svg width="8" height="8" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="8"/></svg>
-      ${card.type}
-    </div>
-    <div class="modal-title">${card.title}</div>
-    <div class="modal-en">${card.en}</div>
-  `;
-  const rows = card.rows.map(([l,v]) => `
-    <div class="info-row">
-      <div class="info-label">${l}</div>
-      <div class="info-value">${v}</div>
-    </div>`).join('');
-  const related = card.related.map(r => `
-    <div class="related-chip" onclick="openCard('${r.id}')">
-      <div class="related-chip-dot" style="background:${r.color};"></div>
-      ${r.name}
-    </div>`).join('');
-  document.getElementById('modal-body').innerHTML = rows + `
-    <div class="related-section">
-      <div class="related-title">延伸探索</div>
-      <div class="related-chips">${related}</div>
-    </div>`;
-  document.getElementById('modal-overlay').classList.add('open');
-}
+    function clearOutput() {
+      setStatus('状态：等待调用');
+      setOutput('这里会显示接口返回的原始 JSON 文本。');
+    }
 
-function closeModal(e) {
-  if (e.target === document.getElementById('modal-overlay')) {
-    document.getElementById('modal-overlay').classList.remove('open');
-  }
-}
+    async function requestJson(path, method = 'GET', body = null) {
+      const url = getBaseUrl() + path;
+      setStatus(`请求中：${method} ${url}`);
 
-function handleUpload() {
-  switchTab('chat');
-  const msgs = document.getElementById('chat-messages');
-  const row = document.createElement('div');
-  row.className = 'msg-row ai';
-  row.innerHTML = `
-    <div class="msg-avatar" style="background:linear-gradient(135deg,#00796B,#0288D1);">AI</div>
-    <div>
-      <div class="msg-bubble">请上传您的报告（支持CT·病理·基因检测），我会帮您解读关键内容并推送相关知识卡片 📄</div>
-    </div>`;
-  msgs.appendChild(row);
-  msgs.scrollTop = msgs.scrollHeight;
-}
+      const options = {
+        method,
+        headers: {
+          'Accept': 'application/json, text/plain, */*'
+        }
+      };
 
-const aiReplies = {
-  '奥希替尼副作用有哪些？': {
-    text: '奥希替尼常见副作用包括：腹泻（24%）、皮疹（20%）、甲沟炎、QT间期延长。大部分为G1-2级，可居家处理。G3以上需暂停用药。',
-    cards: [
-      { name: '腹泻管理', id: 'diarrhea' },
-      { name: '皮疹护理', id: 'skin' },
-      { name: '奥希替尼', id: 'osimertinib' },
-    ]
-  },
-  'EGFR突变是什么意思？': {
-    text: 'EGFR突变是肺腺癌中最常见的驱动基因突变，约50%的中国肺癌患者携带此突变。阳性意味着可使用靶向药，通常是个好消息。',
-    cards: [
-      { name: 'EGFR突变', id: 'egfr' },
-      { name: '靶向治疗', id: 'targeted' },
-      { name: '奥希替尼', id: 'osimertinib' },
-    ]
-  },
-  '化疗期间饮食注意什么？': {
-    text: '靶向治疗期间饮食建议：①充足蛋白质（1.2-1.5g/kg）②避免葡萄柚（影响药物代谢）③腹泻时低纤维饮食 ④补充维生素D和B族维生素。',
-    cards: [
-      { name: '营养补充', id: 'nutrition' },
-      { name: '腹泻管理', id: 'diarrhea' },
-    ]
-  },
-  '白细胞低怎么办？': {
-    text: '白细胞低（骨髓抑制）是化疗常见副作用。轻度可自行恢复；中重度需告知医生，可能需要打升白针（G-CSF）、暂缓化疗或调整剂量。',
-    cards: [
-      { name: '营养补充', id: 'nutrition' },
-    ]
-  },
-};
+      if (body !== null) {
+        options.headers['Content-Type'] = 'application/json';
+        options.body = JSON.stringify(body);
+      }
 
-function sendQuickMsg(text) {
-  switchTab('chat');
-  const input = document.getElementById('chat-input');
-  input.value = text;
-  sendMessage();
-}
+      try {
+        const response = await fetch(url, options);
+        const text = await response.text();
+        let parsed;
 
-function handleEnter(e) {
-  if (e.key === 'Enter') sendMessage();
-}
+        try {
+          parsed = text ? JSON.parse(text) : { rawText: '', status: response.status };
+        } catch {
+          parsed = {
+            status: response.status,
+            ok: response.ok,
+            rawText: text
+          };
+        }
 
-function sendMessage() {
-  const input = document.getElementById('chat-input');
-  const text = input.value.trim();
-  if (!text) return;
-  input.value = '';
-  const msgs = document.getElementById('chat-messages');
+        setStatus(`完成：HTTP ${response.status} ${response.statusText}`, !response.ok);
+        setOutput(parsed);
+      } catch (error) {
+        setStatus('请求失败：' + error.message, true);
+        setOutput({
+          error: error.message,
+          note: '如果这是 CORS 问题，请把当前页面所在域名加入后端 CORS 白名单。'
+        });
+      }
+    }
 
-  const userRow = document.createElement('div');
-  userRow.className = 'msg-row user';
-  userRow.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-avatar" style="background:linear-gradient(135deg,#1A5276,#2E86C1);">我</div>`;
-  msgs.appendChild(userRow);
+    function callGet(path) {
+      requestJson(path, 'GET');
+    }
 
-  const typingRow = document.createElement('div');
-  typingRow.className = 'msg-row ai';
-  typingRow.id = 'typing';
-  typingRow.innerHTML = `<div class="msg-avatar" style="background:linear-gradient(135deg,#00796B,#0288D1);">AI</div><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>`;
-  msgs.appendChild(typingRow);
-  msgs.scrollTop = msgs.scrollHeight;
+    function buildSearchUrl() {
+      const keyword = encodeURIComponent(document.getElementById('keyword').value.trim());
+      const companyName = encodeURIComponent(document.getElementById('companyName').value.trim());
+      const workMode = encodeURIComponent(document.getElementById('workMode').value.trim());
+      const seniorityLevel = encodeURIComponent(document.getElementById('seniorityLevel').value.trim());
+      const analysisStatus = encodeURIComponent(document.getElementById('analysisStatus').value.trim());
+      const limit = encodeURIComponent(document.getElementById('searchLimit').value.trim() || '20');
+      return `/api/jobs/search?keyword=${keyword}&companyName=${companyName}&workMode=${workMode}&seniorityLevel=${seniorityLevel}&analysisStatus=${analysisStatus}&limit=${limit}`;
+    }
 
-  setTimeout(() => {
-    const typing = document.getElementById('typing');
-    if (typing) typing.remove();
-    const reply = aiReplies[text] || { text: '这是个很好的问题。根据您的情况，建议与主治医生详细讨论，同时可以查看知识库中的相关内容了解更多。', cards: [{ name: 'EGFR突变', id: 'egfr' }] };
+    function importFromUrl() {
+      requestJson('/api/job-imports/from-url', 'POST', {
+        url: document.getElementById('jobUrl').value.trim(),
+        sourceType: document.getElementById('sourceType').value.trim(),
+        notes: document.getElementById('notes').value.trim()
+      });
+    }
 
-    const aiRow = document.createElement('div');
-    aiRow.className = 'msg-row ai';
-    const chips = reply.cards.map(c => `<button class="k-chip" onclick="openCard('${c.id}')">${c.name}</button>`).join('');
-    aiRow.innerHTML = `
-      <div class="msg-avatar" style="background:linear-gradient(135deg,#00796B,#0288D1);">AI</div>
-      <div>
-        <div class="msg-bubble">${reply.text}</div>
-        <div class="citation-tag"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/></svg> NCCN指南 · 查看来源</div>
-        <div class="knowledge-chips-row">${chips}</div>
-      </div>`;
-    msgs.appendChild(aiRow);
-    msgs.scrollTop = msgs.scrollHeight;
-  }, 1100);
-}
-</script>
+    function importFromGreenhouse() {
+      requestJson('/api/job-imports/from-greenhouse', 'POST', {
+        boardToken: document.getElementById('greenhouseBoardToken').value.trim()
+      });
+    }
+
+    function importFromLever() {
+      requestJson('/api/job-imports/from-lever', 'POST', {
+        company: document.getElementById('leverCompany').value.trim()
+      });
+    }
+
+    function importFromAshby() {
+      requestJson('/api/job-imports/from-ashby', 'POST', {
+        organizationSlug: document.getElementById('ashbySlug').value.trim()
+      });
+    }
+
+    function runSingleAnalysis() {
+      const jobId = document.getElementById('analysisJobId').value.trim();
+      requestJson(`/api/job-analyses/${encodeURIComponent(jobId)}/run`, 'POST');
+    }
+
+    function runPendingAnalysis() {
+      const limit = encodeURIComponent(document.getElementById('pendingLimit').value.trim() || '10');
+      requestJson(`/api/job-analyses/run-pending?limit=${limit}`, 'POST');
+    }
+
+    function runSchedule() {
+      let body;
+      try {
+        body = JSON.parse(document.getElementById('scheduleBody').value);
+      } catch (error) {
+        setStatus('请求体 JSON 格式错误：' + error.message, true);
+        return;
+      }
+      requestJson('/api/schedules/run', 'POST', body);
+    }
+  </script>
 </body>
 </html>
