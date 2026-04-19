@@ -6,244 +6,403 @@
   <title>Job Agent API 调试页</title>
   <style>
     :root {
-      color-scheme: light;
-      font-family: Arial, "Microsoft YaHei", sans-serif;
+      --bg: #f5f7fb;
+      --card: #ffffff;
+      --text: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --primary: #2563eb;
+      --primary-hover: #1d4ed8;
+      --warning: #d97706;
+      --warning-hover: #b45309;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --result-bg: #0b1736;
+      --result-text: #e5edff;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 18px;
     }
+
+    * { box-sizing: border-box; }
+
     body {
       margin: 0;
-      background: #f6f7fb;
-      color: #1f2937;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+      background: var(--bg);
+      color: var(--text);
     }
+
     .container {
-      max-width: 1200px;
+      max-width: 1500px;
       margin: 0 auto;
-      padding: 20px;
+      padding: 24px;
     }
-    h1 {
+
+    .page-title {
       margin: 0 0 8px;
-      font-size: 28px;
+      font-size: 40px;
+      font-weight: 800;
     }
-    .desc {
-      margin: 0 0 20px;
-      color: #4b5563;
+
+    .page-desc {
+      margin: 0 0 24px;
+      color: var(--muted);
+      font-size: 16px;
     }
-    .card {
-      background: #fff;
-      border: 1px solid #e5e7eb;
-      border-radius: 14px;
-      padding: 16px;
-      margin-bottom: 16px;
-      box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+
+    .top-panel,
+    .card,
+    .result-panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
     }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 16px;
+
+    .top-panel {
+      padding: 20px;
+      margin-bottom: 20px;
     }
-    .field {
-      display: flex;
-      flex-direction: column;
-      gap: 6px;
-      margin-bottom: 12px;
-    }
-    label {
-      font-size: 14px;
-      color: #374151;
-      font-weight: 600;
-    }
-    input, textarea, select {
-      width: 100%;
-      box-sizing: border-box;
-      border: 1px solid #d1d5db;
-      border-radius: 10px;
-      padding: 10px 12px;
-      font-size: 14px;
-      background: #fff;
-    }
-    textarea {
-      min-height: 120px;
-      resize: vertical;
-      font-family: Consolas, monospace;
-    }
-    .btn-row {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-      margin-top: 8px;
-    }
-    button {
-      border: none;
-      border-radius: 10px;
-      padding: 10px 14px;
-      font-size: 14px;
-      cursor: pointer;
-      background: #2563eb;
-      color: #fff;
-    }
-    button.secondary {
-      background: #4b5563;
-    }
-    button.warn {
-      background: #b45309;
-    }
-    button:hover {
-      opacity: 0.92;
-    }
-    .small {
-      font-size: 12px;
-      color: #6b7280;
-    }
-    pre {
-      margin: 0;
-      white-space: pre-wrap;
-      word-break: break-word;
-      background: #0f172a;
-      color: #e5e7eb;
-      padding: 16px;
-      border-radius: 12px;
-      min-height: 320px;
-      overflow: auto;
-      font-size: 13px;
-      line-height: 1.5;
-    }
-    .status {
-      margin-bottom: 10px;
+
+    .field-label {
+      display: block;
       font-size: 14px;
       font-weight: 700;
+      margin-bottom: 8px;
     }
-    .ok { color: #15803d; }
-    .err { color: #b91c1c; }
+
+    .hint {
+      font-size: 12px;
+      color: var(--muted);
+      margin-top: 6px;
+    }
+
+    input,
+    textarea,
+    select {
+      width: 100%;
+      border: 1px solid #d1d5db;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-size: 15px;
+      background: #fff;
+      color: var(--text);
+      outline: none;
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    input:focus,
+    textarea:focus,
+    select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+    }
+
+    textarea {
+      resize: vertical;
+      min-height: 120px;
+      line-height: 1.6;
+      font-family: Consolas, Monaco, monospace;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-top: 16px;
+    }
+
+    .button {
+      border: none;
+      border-radius: 12px;
+      padding: 12px 18px;
+      font-size: 14px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #fff;
+      background: var(--primary);
+      transition: transform .08s ease, background .18s ease, opacity .18s ease;
+    }
+
+    .button:hover { background: var(--primary-hover); }
+    .button:active { transform: translateY(1px); }
+    .button.warning { background: var(--warning); }
+    .button.warning:hover { background: var(--warning-hover); }
+    .button.danger { background: var(--danger); }
+    .button.danger:hover { background: var(--danger-hover); }
+    .button.secondary {
+      color: var(--text);
+      background: #e5e7eb;
+    }
+    .button.secondary:hover {
+      background: #d1d5db;
+    }
+    .button:disabled {
+      opacity: .6;
+      cursor: not-allowed;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
+    }
+
+    .card {
+      padding: 16px;
+      min-height: 280px;
+    }
+
+    .card h3 {
+      margin: 0 0 14px;
+      font-size: 30px;
+      line-height: 1.2;
+    }
+
+    .form-stack {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .result-panel {
+      margin-top: 20px;
+      overflow: hidden;
+    }
+
+    .result-header {
+      padding: 16px 18px;
+      border-bottom: 1px solid var(--line);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .result-header h3 {
+      margin: 0;
+      font-size: 22px;
+    }
+
+    .status-text {
+      font-size: 14px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .result-text {
+      width: 100%;
+      min-height: 340px;
+      border: none;
+      border-radius: 0;
+      margin: 0;
+      padding: 18px;
+      background: var(--result-bg);
+      color: var(--result-text);
+      font-family: Consolas, Monaco, monospace;
+      font-size: 14px;
+      line-height: 1.7;
+    }
+
+    .span-2 { grid-column: span 2; }
+    .span-4 { grid-column: span 4; }
+
+    @media (max-width: 1200px) {
+      .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .span-4 { grid-column: span 2; }
+    }
+
+    @media (max-width: 760px) {
+      .container { padding: 16px; }
+      .page-title { font-size: 30px; }
+      .grid { grid-template-columns: 1fr; }
+      .span-2, .span-4 { grid-column: span 1; }
+      .card h3 { font-size: 24px; }
+    }
   </style>
 </head>
 <body>
   <div class="container">
-    <h1>Job Agent API 调试页</h1>
-    <p class="desc">直接调用你的后端接口，并在页面里显示原始 JSON 文本。</p>
+    <h1 class="page-title">Job Agent API 调试页</h1>
+    <p class="page-desc">直接调用你的后端接口，并在页面里显示原始 JSON 文本。支持手动清空结果文本。</p>
 
-    <div class="card">
-      <div class="field">
-        <label for="baseUrl">后端 Base URL</label>
-        <input id="baseUrl" value="https://job-agent-api-asia-102039125042.asia-southeast1.run.app" />
-        <div class="small">不要带最后的斜杠。</div>
-      </div>
-      <div class="btn-row">
-        <button class="secondary" onclick="callGet('/health')">GET /health</button>
-        <button class="secondary" onclick="callGet('/api/jobs/latest?limit=5')">GET /api/jobs/latest</button>
-        <button class="secondary" onclick="callGet(buildSearchUrl())">GET /api/jobs/search</button>
-      </div>
-    </div>
+    <section class="top-panel">
+      <label class="field-label" for="baseUrl">后端 Base URL</label>
+      <input id="baseUrl" value="http://localhost:5003" placeholder="例如：https://job-agent-api-xxx.run.app" />
+      <div class="hint">不要带最后的斜杠。</div>
 
-    <div class="grid">
+      <div class="toolbar">
+        <button class="button secondary" onclick="callHealth()">GET /health</button>
+        <button class="button secondary" onclick="callLatestJobs()">GET /api/jobs/latest</button>
+        <button class="button secondary" onclick="callSearchJobs()">GET /api/jobs/search</button>
+        <button class="button danger" onclick="clearResultText()">手动清空文本</button>
+      </div>
+    </section>
+
+    <section class="grid">
       <div class="card">
         <h3>搜索职位</h3>
-        <div class="field">
-          <label for="keyword">keyword</label>
-          <input id="keyword" placeholder="例如 unity" />
-        </div>
-        <div class="field">
-          <label for="companyName">companyName</label>
-          <input id="companyName" placeholder="例如 Databricks" />
-        </div>
-        <div class="field">
-          <label for="workMode">workMode</label>
-          <input id="workMode" placeholder="remote / hybrid / onsite" />
-        </div>
-        <div class="field">
-          <label for="seniorityLevel">seniorityLevel</label>
-          <input id="seniorityLevel" placeholder="junior / mid / senior" />
-        </div>
-        <div class="field">
-          <label for="analysisStatus">analysisStatus</label>
-          <input id="analysisStatus" placeholder="pending / completed / failed" />
-        </div>
-        <div class="field">
-          <label for="searchLimit">limit</label>
-          <input id="searchLimit" value="20" />
-        </div>
-        <div class="btn-row">
-          <button onclick="callGet(buildSearchUrl())">查询</button>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="searchKeyword">keyword</label>
+            <input id="searchKeyword" placeholder="例如 unity" />
+          </div>
+          <div>
+            <label class="field-label" for="searchCompanyName">companyName</label>
+            <input id="searchCompanyName" placeholder="例如 Databricks" />
+          </div>
+          <div>
+            <label class="field-label" for="searchWorkMode">workMode</label>
+            <input id="searchWorkMode" placeholder="remote / hybrid / onsite" />
+          </div>
+          <div>
+            <label class="field-label" for="searchSeniorityLevel">seniorityLevel</label>
+            <input id="searchSeniorityLevel" placeholder="junior / mid / senior" />
+          </div>
+          <div>
+            <label class="field-label" for="searchAnalysisStatus">analysisStatus</label>
+            <input id="searchAnalysisStatus" placeholder="pending / completed / failed" />
+          </div>
+          <div>
+            <label class="field-label" for="searchLimit">limit</label>
+            <input id="searchLimit" value="20" />
+          </div>
+          <button class="button" onclick="callSearchJobs()">查询</button>
         </div>
       </div>
 
       <div class="card">
         <h3>单条 URL 导入</h3>
-        <div class="field">
-          <label for="jobUrl">职位 URL</label>
-          <input id="jobUrl" placeholder="https://..." />
-        </div>
-        <div class="field">
-          <label for="sourceType">sourceType</label>
-          <input id="sourceType" value="manual_url" />
-        </div>
-        <div class="field">
-          <label for="notes">notes</label>
-          <input id="notes" value="前端页面测试" />
-        </div>
-        <div class="btn-row">
-          <button onclick="importFromUrl()">POST /api/job-imports/from-url</button>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="importUrl">职位 URL</label>
+            <input id="importUrl" placeholder="https://..." />
+          </div>
+          <div>
+            <label class="field-label" for="importSourceType">sourceType</label>
+            <input id="importSourceType" value="manual_url" />
+          </div>
+          <div>
+            <label class="field-label" for="importNotes">notes</label>
+            <input id="importNotes" value="前端页面测试" />
+          </div>
+          <button class="button" onclick="callImportFromUrl()">POST /api/job-imports/from-url</button>
         </div>
       </div>
 
       <div class="card">
         <h3>Greenhouse 批量导入</h3>
-        <div class="field">
-          <label for="greenhouseBoardToken">boardToken</label>
-          <input id="greenhouseBoardToken" value="databricks" />
-        </div>
-        <div class="btn-row">
-          <button onclick="importFromGreenhouse()">POST /api/job-imports/from-greenhouse</button>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="greenhouseBoardToken">boardToken</label>
+            <input id="greenhouseBoardToken" value="databricks" />
+          </div>
+          <button class="button" onclick="callGreenhouse()">POST /api/job-imports/from-greenhouse</button>
         </div>
       </div>
 
       <div class="card">
         <h3>Lever 批量导入</h3>
-        <div class="field">
-          <label for="leverCompany">company</label>
-          <input id="leverCompany" value="spotify" />
-        </div>
-        <div class="btn-row">
-          <button onclick="importFromLever()">POST /api/job-imports/from-lever</button>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="leverCompany">company</label>
+            <input id="leverCompany" value="spotify" />
+          </div>
+          <button class="button" onclick="callLever()">POST /api/job-imports/from-lever</button>
         </div>
       </div>
 
       <div class="card">
         <h3>Ashby 批量导入</h3>
-        <div class="field">
-          <label for="ashbySlug">organizationSlug</label>
-          <input id="ashbySlug" value="notion" />
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="ashbyOrganizationSlug">organizationSlug</label>
+            <input id="ashbyOrganizationSlug" value="notion" />
+          </div>
+          <button class="button" onclick="callAshby()">POST /api/job-imports/from-ashby</button>
         </div>
-        <div class="btn-row">
-          <button onclick="importFromAshby()">POST /api/job-imports/from-ashby</button>
+      </div>
+
+      <div class="card">
+        <h3>Workable 批量导入</h3>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="workableSubdomain">subdomain</label>
+            <input id="workableSubdomain" value="huggingface" />
+          </div>
+          <button class="button" onclick="callWorkable()">POST /api/job-imports/from-workable</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>SmartRecruiters 批量导入</h3>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="smartrecruitersCompanyIdentifier">companyIdentifier</label>
+            <input id="smartrecruitersCompanyIdentifier" value="smartrecruiters" />
+          </div>
+          <button class="button" onclick="callSmartRecruiters()">POST /api/job-imports/from-smartrecruiters</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>Recruitee 批量导入</h3>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="recruiteeCompanyIdOrSlug">companyIdOrSlug</label>
+            <input id="recruiteeCompanyIdOrSlug" value="personio" />
+          </div>
+          <button class="button" onclick="callRecruitee()">POST /api/job-imports/from-recruitee</button>
         </div>
       </div>
 
       <div class="card">
         <h3>单条职位分析</h3>
-        <div class="field">
-          <label for="analysisJobId">jobId</label>
-          <input id="analysisJobId" placeholder="从 jobs/search 结果里复制 id" />
-        </div>
-        <div class="btn-row">
-          <button onclick="runSingleAnalysis()">POST /api/job-analyses/{jobId}/run</button>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="analysisJobId">jobId</label>
+            <input id="analysisJobId" placeholder="填写职位 UUID" />
+          </div>
+          <div>
+            <label class="field-label" for="analysisForce">force</label>
+            <select id="analysisForce">
+              <option value="false" selected>false</option>
+              <option value="true">true</option>
+            </select>
+          </div>
+          <button class="button" onclick="callRunSingleAnalysis()">POST /api/job-analyses/{jobId}/run</button>
         </div>
       </div>
 
       <div class="card">
         <h3>批量分析待处理职位</h3>
-        <div class="field">
-          <label for="pendingLimit">limit</label>
-          <input id="pendingLimit" value="10" />
-        </div>
-        <div class="btn-row">
-          <button onclick="runPendingAnalysis()">POST /api/job-analyses/run-pending</button>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="pendingLimit">limit</label>
+            <input id="pendingLimit" value="10" />
+          </div>
+          <div>
+            <label class="field-label" for="pendingForce">force</label>
+            <select id="pendingForce">
+              <option value="false" selected>false</option>
+              <option value="true">true</option>
+            </select>
+          </div>
+          <button class="button" onclick="callRunPendingAnalysis()">POST /api/job-analyses/run-pending</button>
         </div>
       </div>
 
-      <div class="card">
+      <div class="card span-2">
         <h3>统一调度入口</h3>
-        <div class="field">
-          <label for="scheduleBody">POST /api/schedules/run 的请求体</label>
-          <textarea id="scheduleBody">{
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="scheduleBody">POST /api/schedules/run 的请求体</label>
+            <textarea id="scheduleBody">{
+  "mode": "import_then_analyze",
+  "sourceNames": ["greenhouse", "lever", "ashby"],
+  "limit": 20,
   "runGreenhouse": true,
   "greenhouseBoardTokens": ["databricks"],
   "runLever": true,
@@ -252,20 +411,27 @@
   "ashbyOrganizationSlugs": ["notion"],
   "analyzeAfterImport": true
 }</textarea>
-        </div>
-        <div class="btn-row">
-          <button class="warn" onclick="runSchedule()">POST /api/schedules/run</button>
+          </div>
+          <div class="toolbar">
+            <button class="button warning" onclick="callScheduleRun()">POST /api/schedules/run</button>
+          </div>
         </div>
       </div>
-    </div>
+    </section>
 
-    <div class="card">
-      <div id="status" class="status">状态：等待调用</div>
-      <pre id="output">这里会显示接口返回的原始 JSON 文本。</pre>
-      <div class="btn-row">
-        <button class="secondary" onclick="clearOutput()">清空输出</button>
+    <section class="result-panel">
+      <div class="result-header">
+        <div>
+          <h3>结果文本</h3>
+          <div id="statusText" class="status-text">状态：等待调用</div>
+        </div>
+        <div class="toolbar" style="margin-top:0;">
+          <button class="button secondary" onclick="copyResultText()">复制文本</button>
+          <button class="button danger" onclick="clearResultText()">清空文本</button>
+        </div>
       </div>
-    </div>
+      <textarea id="resultText" class="result-text" spellcheck="false">这里会显示接口返回的原始 JSON 文本。</textarea>
+    </section>
   </div>
 
   <script>
@@ -273,29 +439,46 @@
       return document.getElementById('baseUrl').value.trim().replace(/\/$/, '');
     }
 
-    function setStatus(text, isError = false) {
-      const status = document.getElementById('status');
-      status.textContent = text;
-      status.className = 'status ' + (isError ? 'err' : 'ok');
+    function setStatus(message) {
+      document.getElementById('statusText').textContent = '状态：' + message;
     }
 
-    function setOutput(data) {
-      const output = document.getElementById('output');
-      if (typeof data === 'string') {
-        output.textContent = data;
-        return;
+    function setResultText(text) {
+      document.getElementById('resultText').value = text;
+    }
+
+    function clearResultText() {
+      setResultText('');
+      setStatus('文本已清空');
+    }
+
+    async function copyResultText() {
+      const text = document.getElementById('resultText').value;
+      try {
+        await navigator.clipboard.writeText(text);
+        setStatus('结果文本已复制');
+      } catch {
+        setStatus('复制失败，请手动复制');
       }
-      output.textContent = JSON.stringify(data, null, 2);
     }
 
-    function clearOutput() {
-      setStatus('状态：等待调用');
-      setOutput('这里会显示接口返回的原始 JSON 文本。');
+    function buildUrl(path, query) {
+      const baseUrl = getBaseUrl();
+      const url = new URL(baseUrl + path);
+      if (query) {
+        Object.keys(query).forEach(key => {
+          const value = query[key];
+          if (value !== '' && value !== null && value !== undefined) {
+            url.searchParams.set(key, value);
+          }
+        });
+      }
+      return url.toString();
     }
 
-    async function requestJson(path, method = 'GET', body = null) {
-      const url = getBaseUrl() + path;
-      setStatus(`请求中：${method} ${url}`);
+    async function requestJson(method, path, body, query) {
+      const url = buildUrl(path, query);
+      setStatus('请求中...');
 
       const options = {
         method,
@@ -304,96 +487,132 @@
         }
       };
 
-      if (body !== null) {
+      if (method !== 'GET') {
         options.headers['Content-Type'] = 'application/json';
-        options.body = JSON.stringify(body);
+        options.body = JSON.stringify(body ?? {});
       }
 
       try {
         const response = await fetch(url, options);
-        const text = await response.text();
-        let parsed;
+        const rawText = await response.text();
+        let prettyText = rawText;
 
         try {
-          parsed = text ? JSON.parse(text) : { rawText: '', status: response.status };
+          prettyText = JSON.stringify(JSON.parse(rawText), null, 2);
         } catch {
-          parsed = {
-            status: response.status,
-            ok: response.ok,
-            rawText: text
-          };
         }
 
-        setStatus(`完成：HTTP ${response.status} ${response.statusText}`, !response.ok);
-        setOutput(parsed);
+        const resultLines = [
+          '时间：' + new Date().toLocaleString(),
+          '请求地址：' + url,
+          '请求方法：' + method,
+          '请求体：',
+          method === 'GET' ? '(无)' : JSON.stringify(body ?? {}, null, 2),
+          '',
+          '状态码：' + response.status + ' ' + response.statusText,
+          '响应内容：',
+          prettyText
+        ];
+
+        setResultText(resultLines.join('\n'));
+        setStatus(response.ok ? '调用成功' : '调用失败');
       } catch (error) {
-        setStatus('请求失败：' + error.message, true);
-        setOutput({
-          error: error.message,
-          note: '如果这是 CORS 问题，请把当前页面所在域名加入后端 CORS 白名单。'
-        });
+        setResultText([
+          '时间：' + new Date().toLocaleString(),
+          '请求失败：' + (error?.message || String(error))
+        ].join('\n'));
+        setStatus('网络异常');
       }
     }
 
-    function callGet(path) {
-      requestJson(path, 'GET');
+    function callHealth() {
+      requestJson('GET', '/health');
     }
 
-    function buildSearchUrl() {
-      const keyword = encodeURIComponent(document.getElementById('keyword').value.trim());
-      const companyName = encodeURIComponent(document.getElementById('companyName').value.trim());
-      const workMode = encodeURIComponent(document.getElementById('workMode').value.trim());
-      const seniorityLevel = encodeURIComponent(document.getElementById('seniorityLevel').value.trim());
-      const analysisStatus = encodeURIComponent(document.getElementById('analysisStatus').value.trim());
-      const limit = encodeURIComponent(document.getElementById('searchLimit').value.trim() || '20');
-      return `/api/jobs/search?keyword=${keyword}&companyName=${companyName}&workMode=${workMode}&seniorityLevel=${seniorityLevel}&analysisStatus=${analysisStatus}&limit=${limit}`;
+    function callLatestJobs() {
+      const limit = document.getElementById('searchLimit').value.trim() || '20';
+      requestJson('GET', '/api/jobs/latest', null, { limit });
     }
 
-    function importFromUrl() {
-      requestJson('/api/job-imports/from-url', 'POST', {
-        url: document.getElementById('jobUrl').value.trim(),
-        sourceType: document.getElementById('sourceType').value.trim(),
-        notes: document.getElementById('notes').value.trim()
+    function callSearchJobs() {
+      requestJson('GET', '/api/jobs/search', null, {
+        keyword: document.getElementById('searchKeyword').value.trim(),
+        companyName: document.getElementById('searchCompanyName').value.trim(),
+        workMode: document.getElementById('searchWorkMode').value.trim(),
+        seniorityLevel: document.getElementById('searchSeniorityLevel').value.trim(),
+        analysisStatus: document.getElementById('searchAnalysisStatus').value.trim(),
+        limit: document.getElementById('searchLimit').value.trim() || '20'
       });
     }
 
-    function importFromGreenhouse() {
-      requestJson('/api/job-imports/from-greenhouse', 'POST', {
+    function callImportFromUrl() {
+      requestJson('POST', '/api/job-imports/from-url', {
+        url: document.getElementById('importUrl').value.trim(),
+        sourceType: document.getElementById('importSourceType').value.trim(),
+        notes: document.getElementById('importNotes').value.trim()
+      });
+    }
+
+    function callGreenhouse() {
+      requestJson('POST', '/api/job-imports/from-greenhouse', {
         boardToken: document.getElementById('greenhouseBoardToken').value.trim()
       });
     }
 
-    function importFromLever() {
-      requestJson('/api/job-imports/from-lever', 'POST', {
+    function callLever() {
+      requestJson('POST', '/api/job-imports/from-lever', {
         company: document.getElementById('leverCompany').value.trim()
       });
     }
 
-    function importFromAshby() {
-      requestJson('/api/job-imports/from-ashby', 'POST', {
-        organizationSlug: document.getElementById('ashbySlug').value.trim()
+    function callAshby() {
+      requestJson('POST', '/api/job-imports/from-ashby', {
+        organizationSlug: document.getElementById('ashbyOrganizationSlug').value.trim()
       });
     }
 
-    function runSingleAnalysis() {
+    function callWorkable() {
+      requestJson('POST', '/api/job-imports/from-workable', {
+        subdomain: document.getElementById('workableSubdomain').value.trim()
+      });
+    }
+
+    function callSmartRecruiters() {
+      requestJson('POST', '/api/job-imports/from-smartrecruiters', {
+        companyIdentifier: document.getElementById('smartrecruitersCompanyIdentifier').value.trim()
+      });
+    }
+
+    function callRecruitee() {
+      requestJson('POST', '/api/job-imports/from-recruitee', {
+        companyIdOrSlug: document.getElementById('recruiteeCompanyIdOrSlug').value.trim()
+      });
+    }
+
+    function callRunSingleAnalysis() {
       const jobId = document.getElementById('analysisJobId').value.trim();
-      requestJson(`/api/job-analyses/${encodeURIComponent(jobId)}/run`, 'POST');
-    }
-
-    function runPendingAnalysis() {
-      const limit = encodeURIComponent(document.getElementById('pendingLimit').value.trim() || '10');
-      requestJson(`/api/job-analyses/run-pending?limit=${limit}`, 'POST');
-    }
-
-    function runSchedule() {
-      let body;
-      try {
-        body = JSON.parse(document.getElementById('scheduleBody').value);
-      } catch (error) {
-        setStatus('请求体 JSON 格式错误：' + error.message, true);
+      const force = document.getElementById('analysisForce').value;
+      if (!jobId) {
+        setStatus('请先填写 jobId');
         return;
       }
-      requestJson('/api/schedules/run', 'POST', body);
+      requestJson('POST', `/api/job-analyses/${encodeURIComponent(jobId)}/run`, null, { force });
+    }
+
+    function callRunPendingAnalysis() {
+      requestJson('POST', '/api/job-analyses/run-pending', null, {
+        limit: document.getElementById('pendingLimit').value.trim() || '10',
+        force: document.getElementById('pendingForce').value
+      });
+    }
+
+    function callScheduleRun() {
+      try {
+        const body = JSON.parse(document.getElementById('scheduleBody').value);
+        requestJson('POST', '/api/schedules/run', body);
+      } catch {
+        setStatus('调度请求体不是合法 JSON');
+      }
     }
   </script>
 </body>
