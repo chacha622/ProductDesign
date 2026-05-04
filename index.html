@@ -13,6 +13,8 @@
       --line: #e5e7eb;
       --primary: #2563eb;
       --primary-hover: #1d4ed8;
+      --success: #059669;
+      --success-hover: #047857;
       --warning: #d97706;
       --warning-hover: #b45309;
       --danger: #dc2626;
@@ -75,6 +77,7 @@
       font-size: 12px;
       color: var(--muted);
       margin-top: 6px;
+      line-height: 1.5;
     }
 
     input,
@@ -126,6 +129,8 @@
 
     .button:hover { background: var(--primary-hover); }
     .button:active { transform: translateY(1px); }
+    .button.success { background: var(--success); }
+    .button.success:hover { background: var(--success-hover); }
     .button.warning { background: var(--warning); }
     .button.warning:hover { background: var(--warning-hover); }
     .button.danger { background: var(--danger); }
@@ -155,14 +160,27 @@
     }
 
     .card h3 {
-      margin: 0 0 14px;
-      font-size: 30px;
+      margin: 0 0 6px;
+      font-size: 26px;
       line-height: 1.2;
+    }
+
+    .card-desc {
+      margin: 0 0 14px;
+      font-size: 13px;
+      color: var(--muted);
+      line-height: 1.5;
     }
 
     .form-stack {
       display: flex;
       flex-direction: column;
+      gap: 12px;
+    }
+
+    .form-grid-2 {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
 
@@ -194,7 +212,7 @@
 
     .result-text {
       width: 100%;
-      min-height: 340px;
+      min-height: 420px;
       border: none;
       border-radius: 0;
       margin: 0;
@@ -219,6 +237,7 @@
       .page-title { font-size: 30px; }
       .grid { grid-template-columns: 1fr; }
       .span-2, .span-4 { grid-column: span 1; }
+      .form-grid-2 { grid-template-columns: 1fr; }
       .card h3 { font-size: 24px; }
     }
   </style>
@@ -226,195 +245,222 @@
 <body>
   <div class="container">
     <h1 class="page-title">Job Agent API 调试页</h1>
-    <p class="page-desc">直接调用你的后端接口，并在页面里显示原始 JSON 文本。支持手动清空结果文本。</p>
+    <p class="page-desc">已删除旧接口，只保留新接口调用。结果文本区域、复制、清空功能保留。</p>
 
     <section class="top-panel">
       <label class="field-label" for="baseUrl">后端 Base URL</label>
-      <input id="baseUrl" value="http://localhost:5003" placeholder="例如：https://job-agent-api-xxx.run.app" />
+      <input id="baseUrl" value="https://job-agent-api-asia-102039125042.asia-southeast1.run.app" placeholder="例如：https://job-agent-api-xxx.run.app" />
       <div class="hint">不要带最后的斜杠。</div>
 
       <div class="toolbar">
-        <button class="button secondary" onclick="callHealth()">GET /health</button>
-        <button class="button secondary" onclick="callLatestJobs()">GET /api/jobs/latest</button>
-        <button class="button secondary" onclick="callSearchJobs()">GET /api/jobs/search</button>
+        <button class="button secondary" onclick="callLatestJobs()">GET 最近职位</button>
+        <button class="button secondary" onclick="callLightSearchJobs()">GET 轻量搜索</button>
+        <button class="button secondary" onclick="callHeavySearchJobs()">POST 复杂搜索</button>
+        <button class="button secondary" onclick="callProfileMatch()">POST 画像匹配</button>
         <button class="button danger" onclick="clearResultText()">手动清空文本</button>
       </div>
     </section>
 
     <section class="grid">
-      <div class="card">
-        <h3>搜索职位</h3>
+      <div class="card span-2">
+        <h3>1. 发现公司 Careers 职位链接</h3>
+        <p class="card-desc">POST /api/job-imports/company-careers/discover：只扫描职位详情页链接，不导入数据库。</p>
         <div class="form-stack">
           <div>
-            <label class="field-label" for="searchKeyword">keyword</label>
-            <input id="searchKeyword" placeholder="例如 unity" />
+            <label class="field-label" for="discoverCareersUrl">careersUrl</label>
+            <input id="discoverCareersUrl" placeholder="例如：https://www.spotifyjobs.com/jobs" />
           </div>
           <div>
-            <label class="field-label" for="searchCompanyName">companyName</label>
-            <input id="searchCompanyName" placeholder="例如 Databricks" />
+            <label class="field-label" for="discoverMaxPages">maxPages</label>
+            <input id="discoverMaxPages" value="3" />
           </div>
-          <div>
-            <label class="field-label" for="searchWorkMode">workMode</label>
-            <input id="searchWorkMode" placeholder="remote / hybrid / onsite" />
-          </div>
-          <div>
-            <label class="field-label" for="searchSeniorityLevel">seniorityLevel</label>
-            <input id="searchSeniorityLevel" placeholder="junior / mid / senior" />
-          </div>
-          <div>
-            <label class="field-label" for="searchAnalysisStatus">analysisStatus</label>
-            <input id="searchAnalysisStatus" placeholder="pending / completed / failed" />
-          </div>
-          <div>
-            <label class="field-label" for="searchLimit">limit</label>
-            <input id="searchLimit" value="20" />
-          </div>
-          <button class="button" onclick="callSearchJobs()">查询</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>单条 URL 导入</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="importUrl">职位 URL</label>
-            <input id="importUrl" placeholder="https://..." />
-          </div>
-          <div>
-            <label class="field-label" for="importSourceType">sourceType</label>
-            <input id="importSourceType" value="manual_url" />
-          </div>
-          <div>
-            <label class="field-label" for="importNotes">notes</label>
-            <input id="importNotes" value="前端页面测试" />
-          </div>
-          <button class="button" onclick="callImportFromUrl()">POST /api/job-imports/from-url</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Greenhouse 批量导入</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="greenhouseBoardToken">boardToken</label>
-            <input id="greenhouseBoardToken" value="databricks" />
-          </div>
-          <button class="button" onclick="callGreenhouse()">POST /api/job-imports/from-greenhouse</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Lever 批量导入</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="leverCompany">company</label>
-            <input id="leverCompany" value="spotify" />
-          </div>
-          <button class="button" onclick="callLever()">POST /api/job-imports/from-lever</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Ashby 批量导入</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="ashbyOrganizationSlug">organizationSlug</label>
-            <input id="ashbyOrganizationSlug" value="notion" />
-          </div>
-          <button class="button" onclick="callAshby()">POST /api/job-imports/from-ashby</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Workable 批量导入</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="workableSubdomain">subdomain</label>
-            <input id="workableSubdomain" value="huggingface" />
-          </div>
-          <button class="button" onclick="callWorkable()">POST /api/job-imports/from-workable</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>SmartRecruiters 批量导入</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="smartrecruitersCompanyIdentifier">companyIdentifier</label>
-            <input id="smartrecruitersCompanyIdentifier" value="smartrecruiters" />
-          </div>
-          <button class="button" onclick="callSmartRecruiters()">POST /api/job-imports/from-smartrecruiters</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>Recruitee 批量导入</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="recruiteeCompanyIdOrSlug">companyIdOrSlug</label>
-            <input id="recruiteeCompanyIdOrSlug" value="personio" />
-          </div>
-          <button class="button" onclick="callRecruitee()">POST /api/job-imports/from-recruitee</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>单条职位分析</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="analysisJobId">jobId</label>
-            <input id="analysisJobId" placeholder="填写职位 UUID" />
-          </div>
-          <div>
-            <label class="field-label" for="analysisForce">force</label>
-            <select id="analysisForce">
-              <option value="false" selected>false</option>
-              <option value="true">true</option>
-            </select>
-          </div>
-          <button class="button" onclick="callRunSingleAnalysis()">POST /api/job-analyses/{jobId}/run</button>
-        </div>
-      </div>
-
-      <div class="card">
-        <h3>批量分析待处理职位</h3>
-        <div class="form-stack">
-          <div>
-            <label class="field-label" for="pendingLimit">limit</label>
-            <input id="pendingLimit" value="10" />
-          </div>
-          <div>
-            <label class="field-label" for="pendingForce">force</label>
-            <select id="pendingForce">
-              <option value="false" selected>false</option>
-              <option value="true">true</option>
-            </select>
-          </div>
-          <button class="button" onclick="callRunPendingAnalysis()">POST /api/job-analyses/run-pending</button>
+          <button class="button success" onclick="callDiscoverCareers()">POST /api/job-imports/company-careers/discover</button>
         </div>
       </div>
 
       <div class="card span-2">
-        <h3>统一调度入口</h3>
+        <h3>2. 批量解析 Careers 职位并入库</h3>
+        <p class="card-desc">POST /api/job-imports/company-careers/jobs：扫描职位详情页，解析后写入数据库，重复导入不重复插入。</p>
         <div class="form-stack">
           <div>
-            <label class="field-label" for="scheduleBody">POST /api/schedules/run 的请求体</label>
-            <textarea id="scheduleBody">{
-  "mode": "import_then_analyze",
-  "sourceNames": ["greenhouse", "lever", "ashby"],
-  "limit": 20,
-  "runGreenhouse": true,
-  "greenhouseBoardTokens": ["databricks"],
-  "runLever": true,
-  "leverCompanies": ["spotify"],
-  "runAshby": true,
-  "ashbyOrganizationSlugs": ["notion"],
-  "analyzeAfterImport": true
-}</textarea>
+            <label class="field-label" for="careersJobsUrl">careersUrl</label>
+            <input id="careersJobsUrl" placeholder="例如：https://www.spotifyjobs.com/jobs" />
           </div>
-          <div class="toolbar">
-            <button class="button warning" onclick="callScheduleRun()">POST /api/schedules/run</button>
+          <div class="form-grid-2">
+            <div>
+              <label class="field-label" for="careersJobsMaxPages">maxPages</label>
+              <input id="careersJobsMaxPages" value="3" />
+            </div>
+            <div>
+              <label class="field-label" for="careersJobsMaxJobs">maxJobs</label>
+              <input id="careersJobsMaxJobs" value="20" />
+            </div>
           </div>
+          <button class="button success" onclick="callImportCareersJobs()">POST /api/job-imports/company-careers/jobs</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>3. 最近导入职位</h3>
+        <p class="card-desc">GET /api/jobs/latest：查询数据库里最近创建/最近导入的职位。</p>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="latestLimit">limit</label>
+            <input id="latestLimit" value="20" />
+          </div>
+          <button class="button" onclick="callLatestJobs()">GET /api/jobs/latest</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>4. 轻量职位搜索</h3>
+        <p class="card-desc">GET /api/jobs/search：按 keyword、公司、工作模式、职级、分析状态快速筛选。</p>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="lightKeyword">keyword</label>
+            <input id="lightKeyword" placeholder="例如 Backend Engineer- Release" />
+          </div>
+          <div>
+            <label class="field-label" for="lightCompanyName">companyName</label>
+            <input id="lightCompanyName" placeholder="例如 Spotify" />
+          </div>
+          <div>
+            <label class="field-label" for="lightWorkMode">workMode</label>
+            <input id="lightWorkMode" placeholder="remote / hybrid / onsite" />
+          </div>
+          <div>
+            <label class="field-label" for="lightSeniorityLevel">seniorityLevel</label>
+            <input id="lightSeniorityLevel" placeholder="manager / senior / director_or_above" />
+          </div>
+          <div>
+            <label class="field-label" for="lightAnalysisStatus">analysisStatus</label>
+            <input id="lightAnalysisStatus" placeholder="pending / completed / failed" />
+          </div>
+          <div>
+            <label class="field-label" for="lightLimit">limit</label>
+            <input id="lightLimit" value="20" />
+          </div>
+          <button class="button" onclick="callLightSearchJobs()">GET /api/jobs/search</button>
+        </div>
+      </div>
+
+      <div class="card span-2">
+        <h3>5. 复杂职位搜索</h3>
+        <p class="card-desc">POST /api/jobs/search：多条件组合搜索，支持国家、城市、用工类型、发布时间、分页 offset。</p>
+        <div class="form-stack">
+          <div class="form-grid-2">
+            <div>
+              <label class="field-label" for="heavyKeyword">keyword</label>
+              <input id="heavyKeyword" placeholder="例如 Backend Engineer- Release" />
+            </div>
+            <div>
+              <label class="field-label" for="heavySourceName">sourceName</label>
+              <input id="heavySourceName" placeholder="例如 lever" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyCompanyName">companyName</label>
+              <input id="heavyCompanyName" placeholder="例如 Spotify" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyCountry">country</label>
+              <input id="heavyCountry" placeholder="例如 United States" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyCity">city</label>
+              <input id="heavyCity" placeholder="例如 New York" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyWorkMode">workMode</label>
+              <input id="heavyWorkMode" placeholder="remote / hybrid / onsite" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyEmploymentType">employmentType</label>
+              <input id="heavyEmploymentType" placeholder="full_time / contract / internship" />
+            </div>
+            <div>
+              <label class="field-label" for="heavySeniorityLevel">seniorityLevel</label>
+              <input id="heavySeniorityLevel" placeholder="manager / senior / director_or_above" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyPublishedFrom">publishedFrom</label>
+              <input id="heavyPublishedFrom" type="datetime-local" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyPublishedTo">publishedTo</label>
+              <input id="heavyPublishedTo" type="datetime-local" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyLimit">limit</label>
+              <input id="heavyLimit" value="20" />
+            </div>
+            <div>
+              <label class="field-label" for="heavyOffset">offset</label>
+              <input id="heavyOffset" value="0" />
+            </div>
+          </div>
+          <button class="button warning" onclick="callHeavySearchJobs()">POST /api/jobs/search</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h3>6. 单条职位 AI 分析</h3>
+        <p class="card-desc">POST /api/job-analyses/{jobId}/run：对某一条职位执行 AI 分析。</p>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="analysisJobId">jobId</label>
+            <input id="analysisJobId" placeholder="填写 jobs 表里的 UUID" />
+          </div>
+          <div>
+            <label class="field-label" for="analysisForce">force</label>
+            <select id="analysisForce">
+              <option value="false" selected>false：已分析过则跳过</option>
+              <option value="true">true：强制重新分析</option>
+            </select>
+          </div>
+          <button class="button warning" onclick="callRunSingleAnalysis()">POST /api/job-analyses/{jobId}/run</button>
+        </div>
+      </div>
+
+      <div class="card span-2">
+        <h3>7. 根据用户画像匹配职位</h3>
+        <p class="card-desc">POST /api/job-matches/search-by-profile：根据简历、技能、求职目标和偏好匹配职位。</p>
+        <div class="form-stack">
+          <div>
+            <label class="field-label" for="profileText">profileText</label>
+            <textarea id="profileText" placeholder="例如：6年 Unity / C# / Three.js / AI 产品开发经验，目标岗位为 Unity Developer / AI Engineer / Technical Product Manager..."></textarea>
+          </div>
+          <div>
+            <label class="field-label" for="profileKeywords">keywords</label>
+            <input id="profileKeywords" placeholder="用逗号分隔，例如 Unity,C#,AI,WebGL" />
+            <div class="hint">会自动转换成数组：["Unity", "C#", "AI", "WebGL"]</div>
+          </div>
+          <div class="form-grid-2">
+            <div>
+              <label class="field-label" for="profileCompanyName">companyName</label>
+              <input id="profileCompanyName" placeholder="可空，例如 Spotify" />
+            </div>
+            <div>
+              <label class="field-label" for="profileCountry">country</label>
+              <input id="profileCountry" placeholder="可空，例如 United States" />
+            </div>
+            <div>
+              <label class="field-label" for="profileWorkMode">workMode</label>
+              <input id="profileWorkMode" placeholder="remote / hybrid / onsite" />
+            </div>
+            <div>
+              <label class="field-label" for="profilePublishedFrom">publishedFrom</label>
+              <input id="profilePublishedFrom" type="datetime-local" />
+            </div>
+            <div>
+              <label class="field-label" for="profilePublishedTo">publishedTo</label>
+              <input id="profilePublishedTo" type="datetime-local" />
+            </div>
+            <div>
+              <label class="field-label" for="profileLimit">limit</label>
+              <input id="profileLimit" value="20" />
+            </div>
+          </div>
+          <button class="button warning" onclick="callProfileMatch()">POST /api/job-matches/search-by-profile</button>
         </div>
       </div>
     </section>
@@ -462,6 +508,43 @@
       }
     }
 
+    function getValue(id) {
+      return document.getElementById(id).value.trim();
+    }
+
+    function getNumberValue(id, fallback) {
+      const raw = getValue(id);
+      if (raw === '') return fallback;
+      const value = Number(raw);
+      return Number.isFinite(value) ? value : fallback;
+    }
+
+    function getDateTimeValue(id) {
+      const raw = getValue(id);
+      if (!raw) return '';
+      const date = new Date(raw);
+      if (Number.isNaN(date.getTime())) return raw;
+      return date.toISOString();
+    }
+
+    function compactObject(obj) {
+      const result = {};
+      Object.keys(obj).forEach(key => {
+        const value = obj[key];
+        if (value === '' || value === null || value === undefined) return;
+        if (Array.isArray(value) && value.length === 0) return;
+        result[key] = value;
+      });
+      return result;
+    }
+
+    function parseCommaArray(raw) {
+      return raw
+        .split(',')
+        .map(item => item.trim())
+        .filter(Boolean);
+    }
+
     function buildUrl(path, query) {
       const baseUrl = getBaseUrl();
       const url = new URL(baseUrl + path);
@@ -477,7 +560,10 @@
     }
 
     async function requestJson(method, path, body, query) {
-      const url = buildUrl(path, query);
+      const cleanBody = body ? compactObject(body) : body;
+      const cleanQuery = query ? compactObject(query) : query;
+      const url = buildUrl(path, cleanQuery);
+
       setStatus('请求中...');
 
       const options = {
@@ -489,7 +575,7 @@
 
       if (method !== 'GET') {
         options.headers['Content-Type'] = 'application/json';
-        options.body = JSON.stringify(body ?? {});
+        options.body = JSON.stringify(cleanBody ?? {});
       }
 
       try {
@@ -500,6 +586,7 @@
         try {
           prettyText = JSON.stringify(JSON.parse(rawText), null, 2);
         } catch {
+          // 后端如果返回 text/plain，这里保持原样展示。
         }
 
         const resultLines = [
@@ -507,7 +594,7 @@
           '请求地址：' + url,
           '请求方法：' + method,
           '请求体：',
-          method === 'GET' ? '(无)' : JSON.stringify(body ?? {}, null, 2),
+          method === 'GET' ? '(无)' : JSON.stringify(cleanBody ?? {}, null, 2),
           '',
           '状态码：' + response.status + ' ' + response.statusText,
           '响应内容：',
@@ -525,94 +612,78 @@
       }
     }
 
-    function callHealth() {
-      requestJson('GET', '/health');
+    function callDiscoverCareers() {
+      requestJson('POST', '/api/job-imports/company-careers/discover', {
+        careersUrl: getValue('discoverCareersUrl'),
+        maxPages: getNumberValue('discoverMaxPages', 3)
+      });
+    }
+
+    function callImportCareersJobs() {
+      requestJson('POST', '/api/job-imports/company-careers/jobs', {
+        careersUrl: getValue('careersJobsUrl'),
+        maxPages: getNumberValue('careersJobsMaxPages', 3),
+        maxJobs: getNumberValue('careersJobsMaxJobs', 20)
+      });
     }
 
     function callLatestJobs() {
-      const limit = document.getElementById('searchLimit').value.trim() || '20';
-      requestJson('GET', '/api/jobs/latest', null, { limit });
+      requestJson('GET', '/api/jobs/latest', null, {
+        limit: getNumberValue('latestLimit', 20)
+      });
     }
 
-    function callSearchJobs() {
+    function callLightSearchJobs() {
       requestJson('GET', '/api/jobs/search', null, {
-        keyword: document.getElementById('searchKeyword').value.trim(),
-        companyName: document.getElementById('searchCompanyName').value.trim(),
-        workMode: document.getElementById('searchWorkMode').value.trim(),
-        seniorityLevel: document.getElementById('searchSeniorityLevel').value.trim(),
-        analysisStatus: document.getElementById('searchAnalysisStatus').value.trim(),
-        limit: document.getElementById('searchLimit').value.trim() || '20'
+        keyword: getValue('lightKeyword'),
+        companyName: getValue('lightCompanyName'),
+        workMode: getValue('lightWorkMode'),
+        seniorityLevel: getValue('lightSeniorityLevel'),
+        analysisStatus: getValue('lightAnalysisStatus'),
+        limit: getNumberValue('lightLimit', 20)
       });
     }
 
-    function callImportFromUrl() {
-      requestJson('POST', '/api/job-imports/from-url', {
-        url: document.getElementById('importUrl').value.trim(),
-        sourceType: document.getElementById('importSourceType').value.trim(),
-        notes: document.getElementById('importNotes').value.trim()
-      });
-    }
-
-    function callGreenhouse() {
-      requestJson('POST', '/api/job-imports/from-greenhouse', {
-        boardToken: document.getElementById('greenhouseBoardToken').value.trim()
-      });
-    }
-
-    function callLever() {
-      requestJson('POST', '/api/job-imports/from-lever', {
-        company: document.getElementById('leverCompany').value.trim()
-      });
-    }
-
-    function callAshby() {
-      requestJson('POST', '/api/job-imports/from-ashby', {
-        organizationSlug: document.getElementById('ashbyOrganizationSlug').value.trim()
-      });
-    }
-
-    function callWorkable() {
-      requestJson('POST', '/api/job-imports/from-workable', {
-        subdomain: document.getElementById('workableSubdomain').value.trim()
-      });
-    }
-
-    function callSmartRecruiters() {
-      requestJson('POST', '/api/job-imports/from-smartrecruiters', {
-        companyIdentifier: document.getElementById('smartrecruitersCompanyIdentifier').value.trim()
-      });
-    }
-
-    function callRecruitee() {
-      requestJson('POST', '/api/job-imports/from-recruitee', {
-        companyIdOrSlug: document.getElementById('recruiteeCompanyIdOrSlug').value.trim()
+    function callHeavySearchJobs() {
+      requestJson('POST', '/api/jobs/search', {
+        keyword: getValue('heavyKeyword'),
+        sourceName: getValue('heavySourceName'),
+        companyName: getValue('heavyCompanyName'),
+        country: getValue('heavyCountry'),
+        city: getValue('heavyCity'),
+        workMode: getValue('heavyWorkMode'),
+        employmentType: getValue('heavyEmploymentType'),
+        seniorityLevel: getValue('heavySeniorityLevel'),
+        publishedFrom: getDateTimeValue('heavyPublishedFrom'),
+        publishedTo: getDateTimeValue('heavyPublishedTo'),
+        limit: getNumberValue('heavyLimit', 20),
+        offset: getNumberValue('heavyOffset', 0)
       });
     }
 
     function callRunSingleAnalysis() {
-      const jobId = document.getElementById('analysisJobId').value.trim();
-      const force = document.getElementById('analysisForce').value;
+      const jobId = getValue('analysisJobId');
+      const force = document.getElementById('analysisForce').value === 'true';
+
       if (!jobId) {
         setStatus('请先填写 jobId');
         return;
       }
+
       requestJson('POST', `/api/job-analyses/${encodeURIComponent(jobId)}/run`, null, { force });
     }
 
-    function callRunPendingAnalysis() {
-      requestJson('POST', '/api/job-analyses/run-pending', null, {
-        limit: document.getElementById('pendingLimit').value.trim() || '10',
-        force: document.getElementById('pendingForce').value
+    function callProfileMatch() {
+      requestJson('POST', '/api/job-matches/search-by-profile', {
+        profileText: getValue('profileText'),
+        keywords: parseCommaArray(getValue('profileKeywords')),
+        companyName: getValue('profileCompanyName'),
+        country: getValue('profileCountry'),
+        workMode: getValue('profileWorkMode'),
+        publishedFrom: getDateTimeValue('profilePublishedFrom'),
+        publishedTo: getDateTimeValue('profilePublishedTo'),
+        limit: getNumberValue('profileLimit', 20)
       });
-    }
-
-    function callScheduleRun() {
-      try {
-        const body = JSON.parse(document.getElementById('scheduleBody').value);
-        requestJson('POST', '/api/schedules/run', body);
-      } catch {
-        setStatus('调度请求体不是合法 JSON');
-      }
     }
   </script>
 </body>
