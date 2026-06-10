@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<title>Resa — 4 Functions App v11</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --void:#050403;--deep:#0A0907;--surface:#120F0B;--raised:#191613;--lift:#211E18;
+  --border:rgba(201,169,110,.10);--border-m:rgba(201,169,110,.18);--border-h:rgba(201,169,110,.32);
+  --gold:#C9A96E;--gold-d:#8B7355;--gold-p:#EAD9B4;--blue:#87B4C9;--blue-p:#B8D4E0;
+  --amber:#D39A52;--rose:#D99A91;--peach:#E8B184;--spark:#E8C85F;
+  --ink:#EDE8DF;--ink2:#9B9386;--ink3:#5A5348;--ink4:#252220;
+  --serif:Georgia,"Times New Roman",serif;--sans:-apple-system,BlinkMacSystemFont,"Inter","Helvetica Neue",Arial,sans-serif;
+}
+html,body{width:100%;height:100%;background:#020100;display:flex;align-items:center;justify-content:center;font-family:var(--sans);color:var(--ink);overflow:hidden}
+.device{width:393px;height:852px;background:var(--void);border-radius:52px;overflow:hidden;position:relative;box-shadow:0 0 0 1px rgba(201,169,110,.12),0 58px 116px rgba(0,0,0,.95),inset 0 1px 0 rgba(255,255,255,.025)}
+.device:before{content:"";position:absolute;top:10px;left:50%;transform:translateX(-50%);width:134px;height:31px;border-radius:18px;background:#020100;z-index:20;box-shadow:inset 0 0 0 1px rgba(255,255,255,.035)}
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;overflow:hidden;background:radial-gradient(circle at 50% 26%, rgba(135,180,201,.08), transparent 34%),radial-gradient(circle at 48% 58%, rgba(201,169,110,.06), transparent 45%),var(--void)}
+.status{display:flex;justify-content:space-between;align-items:center;padding:15px 28px 0;font-size:11px;color:var(--ink3);letter-spacing:.05em;flex-shrink:0}
+.top{display:flex;justify-content:space-between;align-items:center;padding:16px 24px 0;flex-shrink:0}
+.logo{font-family:var(--serif);font-size:15px;font-weight:300;letter-spacing:.28em;color:var(--gold)}
+.sensor-pill{display:flex;align-items:center;gap:7px;border:1px solid var(--border-m);background:rgba(18,15,11,.72);border-radius:999px;padding:8px 11px;color:var(--ink2);font-size:9px;letter-spacing:.08em;text-transform:uppercase}
+.sensor-dot{width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px rgba(201,169,110,.55);animation:pulse 2.4s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:.42;transform:scale(.85)}50%{opacity:1;transform:scale(1.2)}}
+.content{flex:1;min-height:0;overflow:auto;padding:15px 18px 88px;scrollbar-width:none}.content::-webkit-scrollbar{display:none}
+.page{display:none}.page.active{display:block;animation:fade .35s ease both}@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.kicker{font-size:9px;color:var(--gold-d);letter-spacing:.18em;text-transform:uppercase;margin-bottom:10px;display:flex;align-items:center;gap:8px}.kicker:before{content:"";width:18px;height:.5px;background:var(--gold-d);opacity:.65}
+.title{font-family:var(--serif);font-size:30px;line-height:1.05;font-weight:300;letter-spacing:-.01em;color:var(--ink);margin-bottom:8px}.title em{font-style:italic;color:var(--gold-p)}
+.sub{font-size:12px;line-height:1.62;color:var(--ink2);font-weight:300;max-width:316px}
+.card{position:relative;overflow:hidden;border:1px solid var(--border-m);border-radius:31px;padding:18px;background:linear-gradient(180deg,rgba(33,30,24,.86),rgba(18,15,11,.86)),radial-gradient(circle at 50% 28%,rgba(135,180,201,.12),transparent 42%);box-shadow:0 30px 80px rgba(0,0,0,.36),inset 0 1px 0 rgba(255,255,255,.03);margin-bottom:13px}
+.card.soft{background:rgba(255,255,255,.018);border-color:var(--border)}
+.card:after{content:"";position:absolute;inset:0;background:radial-gradient(circle at 16% 12%,rgba(201,169,110,.08),transparent 30%);pointer-events:none}.card>*{position:relative;z-index:2}
+.card-title{font-family:var(--serif);font-size:22px;font-weight:300;line-height:1.14;color:var(--ink);margin-bottom:8px}
+.copy{font-size:12px;line-height:1.58;color:var(--ink2)}.copy strong{font-weight:500;color:var(--gold-p)}.copy b{font-weight:500;color:var(--blue-p)}
+.label{font-size:8px;color:var(--gold-d);letter-spacing:.15em;text-transform:uppercase;margin-bottom:8px}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.primary{height:49px;border:0;border-radius:17px;background:linear-gradient(135deg,var(--gold),#EAD9B4);color:#19140E;font-weight:650;font-size:12px;letter-spacing:.03em;cursor:pointer;box-shadow:0 12px 32px rgba(201,169,110,.18)}
+.secondary{height:43px;border:1px solid rgba(201,169,110,.11);background:rgba(255,255,255,.018);border-radius:16px;color:var(--gold-p);font-size:11px;cursor:pointer}
+.soft-link{border:0;background:transparent;color:var(--gold-d);font-size:10px;line-height:1.3;padding:4px 2px;cursor:pointer;text-decoration:none}.soft-link:after{content:" →";opacity:.55}
+
+/* ---------- Resa penguin as reusable scene component ---------- */
+.scene{position:relative;height:306px;margin:-2px 0 4px;display:flex;align-items:center;justify-content:center}
+.scene:before{content:"";position:absolute;width:286px;height:286px;border-radius:50%;border:1px solid rgba(201,169,110,.055)}
+.scene:after{content:"";position:absolute;width:244px;height:244px;border-radius:50%;background:radial-gradient(circle at 50% 52%,rgba(255,220,178,.22),rgba(211,154,82,.08) 42%,transparent 74%);filter:blur(13px);animation:aura 5.5s ease-in-out infinite}
+@keyframes aura{0%,100%{opacity:.55;transform:scale(.96)}50%{opacity:1;transform:scale(1.05)}}
+.penguin-scene{position:relative;z-index:2;width:224px;height:238px;animation:bob 6s ease-in-out infinite;filter:drop-shadow(0 24px 44px rgba(0,0,0,.42))}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.pg-body{position:absolute;left:43px;top:57px;width:138px;height:158px;border-radius:50% 50% 44% 44%;background:linear-gradient(180deg,#3B2E44 0%,#251D2D 46%,#151018 100%);border:1px solid rgba(201,169,110,.14);box-shadow:inset 0 20px 28px rgba(255,255,255,.04),inset 0 -24px 28px rgba(0,0,0,.28)}
+.pg-belly{position:absolute;left:59px;top:94px;width:106px;height:111px;border-radius:50% 50% 43% 43%;background:linear-gradient(180deg,#FFF4E7,#E9CFB4 72%,#C9A987);box-shadow:inset 0 8px 13px rgba(255,255,255,.28)}
+.pg-head{position:absolute;left:38px;top:17px;width:148px;height:120px;border-radius:52% 52% 48% 48%;background:linear-gradient(180deg,#3D3045,#201827 100%);box-shadow:inset 0 10px 18px rgba(255,255,255,.035);border:1px solid rgba(201,169,110,.12)}
+.pg-faceL,.pg-faceR{position:absolute;top:45px;width:50px;height:56px;border-radius:50%;background:linear-gradient(180deg,#FFF5E9,#EAD8C2)}
+.pg-faceL{left:23px;transform:rotate(-9deg)}.pg-faceR{right:23px;transform:rotate(9deg)}
+.pg-eye{position:absolute;top:62px;width:23px;height:16px;border-radius:50%;border-bottom:4px solid #5C2A22}
+.pg-eye:after{content:"";position:absolute;right:-2px;top:4px;width:8px;height:4px;border-radius:50%;border-bottom:2px solid #5C2A22;transform:rotate(26deg)}
+.pg-eye.l{left:42px;transform:rotate(5deg)}.pg-eye.r{right:42px;transform:rotate(-5deg)}
+.pg-blush{position:absolute;top:76px;width:26px;height:16px;border-radius:50%;background:radial-gradient(circle,rgba(231,142,144,.54),transparent 72%);filter:blur(.8px)}.pg-blush.l{left:28px}.pg-blush.r{right:28px}
+.pg-beak{position:absolute;left:95px;top:78px;width:34px;height:21px;border-radius:52% 52% 58% 58%;background:linear-gradient(180deg,#F2B866,#D98C3E);box-shadow:inset 0 3px 5px rgba(255,255,255,.18)}
+.pg-wing{position:absolute;top:126px;width:44px;height:72px;border-radius:52%;background:linear-gradient(180deg,#34263C,#18111D);box-shadow:inset 0 8px 12px rgba(255,255,255,.025);transition:.35s}
+.pg-wing.l{left:22px;transform:rotate(-35deg)}.pg-wing.r{right:22px;transform:rotate(35deg)}
+.pg-foot{position:absolute;bottom:6px;width:42px;height:18px;border-radius:55%;background:linear-gradient(180deg,#F0B762,#C87932);box-shadow:0 5px 10px rgba(0,0,0,.20)}.pg-foot.l{left:65px}.pg-foot.r{right:65px}
+.pg-tuft{position:absolute;left:93px;top:0;width:24px;height:36px;border-radius:70% 30% 70% 30%;background:linear-gradient(180deg,#F1A9B2,#35243B);transform:rotate(23deg)}.pg-tuft.two{left:115px;top:5px;height:30px;transform:rotate(42deg);opacity:.72}
+.pg-star{position:absolute;left:39px;top:42px;width:18px;height:18px;filter:drop-shadow(0 0 8px rgba(232,200,95,.45))}.pg-star:before{content:"★";position:absolute;color:#F2CA76;font-size:18px}
+.warmth-glow{position:absolute;left:48px;top:98px;width:128px;height:128px;border-radius:50%;background:radial-gradient(circle,rgba(255,201,130,.34),transparent 68%);filter:blur(10px)}
+.warm-bottle{position:absolute;left:72px;top:121px;width:80px;height:88px;border-radius:24px 24px 28px 28px;background:linear-gradient(180deg,#FFBE7E,#ED9276 52%,#B85A4F);border:1px solid rgba(255,223,178,.28);box-shadow:0 0 30px rgba(237,146,118,.30),inset 0 12px 18px rgba(255,255,255,.16)}
+.warm-bottle:before{content:"";position:absolute;left:26px;top:-15px;width:28px;height:22px;border-radius:10px 10px 4px 4px;background:linear-gradient(180deg,#FFC38B,#C8735B);border:1px solid rgba(255,223,178,.24)}
+.warm-bottle:after{content:"♡";position:absolute;left:29px;top:31px;color:#FFE6B4;font-size:24px;text-shadow:0 0 8px rgba(255,230,180,.36)}
+.knit{position:absolute;inset:16px 9px 9px;border-radius:22px;opacity:.45;background:repeating-linear-gradient(90deg,transparent 0 8px,rgba(255,255,255,.24) 9px,transparent 11px)}
+.breath-bubble,.breath-bubble:before,.breath-bubble:after{position:absolute;border-radius:50%;border:1px solid rgba(184,212,224,.34);background:rgba(135,180,201,.06);animation:float 4s ease-in-out infinite}
+.breath-bubble{right:18px;top:58px;width:28px;height:28px}.breath-bubble:before{content:"";right:34px;top:-18px;width:18px;height:18px}.breath-bubble:after{content:"";right:12px;top:-39px;width:12px;height:12px}@keyframes float{0%,100%{transform:translateY(0);opacity:.52}50%{transform:translateY(-12px);opacity:1}}
+.sleep-moon{position:absolute;right:23px;top:35px;width:42px;height:42px;border-radius:50%;box-shadow:-10px 7px 0 rgba(234,217,180,.80);opacity:.82}
+.walk-path{position:absolute;left:34px;right:34px;bottom:0;height:28px;border-radius:50%;border-bottom:1px dashed rgba(201,169,110,.22)}
+.scene.breathe .warm-bottle,.scene.breathe .warmth-glow,.scene.breathe .pg-star{display:none}.scene.breathe .pg-wing.l{transform:rotate(-15deg);left:27px}.scene.breathe .pg-wing.r{transform:rotate(15deg);right:27px}
+.scene.walk .warm-bottle,.scene.walk .warmth-glow{display:none}.scene.walk .pg-wing.l{transform:rotate(-5deg);left:20px}.scene.walk .pg-wing.r{transform:rotate(22deg);right:18px}.scene.walk .pg-foot.l{bottom:8px;transform:translateX(7px)}.scene.walk .pg-foot.r{bottom:2px;transform:translateX(-4px)}
+.scene.sleep .warm-bottle{transform:scale(.82) translateY(10px)}.scene.growth .warm-bottle{opacity:.55;transform:scale(.82) translateY(16px)}
+.scene.tiny{height:82px;min-width:78px;margin:0}.scene.tiny:before,.scene.tiny:after{display:none}.scene.tiny .penguin-scene{transform:scale(.34);transform-origin:center;animation:none}
+.scene.tiny .breath-bubble{display:none}
+
+/* Page-specific components */
+.state-tabs{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;background:rgba(255,255,255,.025);border:1px solid rgba(201,169,110,.08);border-radius:17px;padding:5px;margin:6px 0 14px}
+.state-btn{border:0;background:transparent;color:var(--ink3);border-radius:13px;padding:9px 5px;font-size:9px;letter-spacing:.07em;text-transform:uppercase;cursor:pointer}.state-btn.active{background:linear-gradient(135deg,rgba(201,169,110,.18),rgba(135,180,201,.08));color:var(--gold-p)}
+.home-state{display:none}.home-state.active{display:block;animation:fade .3s ease both}
+.progress-card{margin-top:14px;border:1px solid rgba(201,169,110,.1);background:rgba(0,0,0,.12);border-radius:20px;padding:13px 14px}.progress-top{display:flex;justify-content:space-between;margin-bottom:10px}.progress-title{font-size:10px;color:var(--ink2);letter-spacing:.08em;text-transform:uppercase}.progress-day{font-size:10px;color:var(--gold-p)}.progress-bar{height:5px;border-radius:99px;background:rgba(255,255,255,.06);overflow:hidden}.progress-fill{height:100%;width:43%;background:linear-gradient(90deg,var(--gold),var(--blue));border-radius:99px}
+.signal-strip{display:flex;justify-content:space-between;align-items:center;margin-bottom:11px;border:1px solid rgba(135,180,201,.12);background:rgba(135,180,201,.035);border-radius:18px;padding:11px 12px}.signal-text{font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--blue-p)}.signal-time{font-size:10px;color:var(--ink3)}
+.decision-panel{display:grid;gap:9px;margin-top:3px}.decision-row{border:1px solid rgba(201,169,110,.10);background:rgba(255,255,255,.018);border-radius:18px;padding:12px 13px}.decision-label{font-size:8px;color:var(--gold-d);letter-spacing:.15em;text-transform:uppercase;margin-bottom:6px}.decision-main{font-family:var(--serif);font-size:21px;line-height:1.14;font-weight:300;color:var(--ink)}.decision-text{font-size:12px;line-height:1.55;color:var(--ink2)}.decision-text strong{color:var(--blue-p);font-weight:500}.decision-row.primary-row{border-color:rgba(201,169,110,.18);background:linear-gradient(135deg,rgba(201,169,110,.075),rgba(135,180,201,.03))}
+.soft-explain{display:flex;justify-content:center;align-items:center;gap:6px;font-size:10px;color:var(--ink3);letter-spacing:.02em;margin-top:9px}
+.timeline{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:12px}.time-node{position:relative;border:1px solid rgba(201,169,110,.08);background:rgba(255,255,255,.018);border-radius:17px;padding:11px 9px}.time{font-size:8px;letter-spacing:.14em;text-transform:uppercase;color:var(--ink3);margin-bottom:6px}.time-state{font-size:11px;color:var(--ink);line-height:1.35}.time-note{font-size:9px;color:var(--ink3);margin-top:6px;line-height:1.3}.time-node.active{border-color:rgba(201,169,110,.22);background:rgba(201,169,110,.045)}.time-node.active .time-state{color:var(--gold-p)}
+.action-list{display:grid;gap:9px;margin-top:12px}.action-item{display:grid;grid-template-columns:78px 1fr auto;gap:10px;align-items:center;border:1px solid rgba(201,169,110,.09);background:rgba(255,255,255,.018);border-radius:20px;padding:10px;cursor:pointer;min-height:100px}.action-name{font-size:13px;color:var(--ink);margin-bottom:3px}.action-desc{font-size:10px;line-height:1.35;color:var(--ink3)}.action-tag{font-size:9px;color:var(--blue-p);border:1px solid rgba(135,180,201,.12);background:rgba(135,180,201,.04);border-radius:999px;padding:6px 8px;white-space:nowrap}
+.plan-grid{display:grid;gap:9px;margin-top:12px}.plan-day{border:1px solid rgba(201,169,110,.09);background:rgba(0,0,0,.11);border-radius:18px;padding:12px}.plan-day-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}.plan-day b{font-size:11px;color:var(--gold-p);font-weight:500}.plan-day span{font-size:9px;color:var(--ink3);letter-spacing:.08em;text-transform:uppercase}
+.feedback{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:12px}.feedback button{border:1px solid rgba(201,169,110,.10);background:rgba(255,255,255,.018);border-radius:15px;color:var(--ink2);font-size:10px;padding:10px 6px;cursor:pointer}.feedback button.selected{border-color:rgba(201,169,110,.24);background:rgba(201,169,110,.075);color:var(--gold-p)}
+.chat-feed{display:grid;gap:10px;margin-top:12px}.chat-msg{border:1px solid rgba(201,169,110,.09);background:rgba(255,255,255,.018);border-radius:22px;padding:11px}.chat-row{display:grid;grid-template-columns:78px 1fr;gap:10px;align-items:center}.chat-time{font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px}.chat-text{font-size:12px;line-height:1.58;color:var(--ink2)}.chat-text b{color:var(--gold-p);font-weight:500}.chat-msg.highlight{border-color:rgba(201,169,110,.18);background:linear-gradient(135deg,rgba(201,169,110,.07),rgba(135,180,201,.025))}
+.quick-asks{display:flex;gap:7px;overflow:auto;margin-top:12px;padding-bottom:2px;scrollbar-width:none}.quick-asks::-webkit-scrollbar{display:none}.ask-chip{flex:0 0 auto;border:1px solid rgba(201,169,110,.10);background:rgba(255,255,255,.018);border-radius:999px;color:var(--ink2);font-size:10px;padding:9px 10px;cursor:pointer;white-space:nowrap}.chat-input{margin-top:12px;border:1px solid rgba(201,169,110,.11);background:rgba(255,255,255,.018);border-radius:20px;height:46px;display:flex;align-items:center;justify-content:space-between;padding:0 13px;color:var(--ink3);font-size:11px}
+.impact-grid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.impact-box{border:1px solid rgba(201,169,110,.09);background:rgba(0,0,0,.10);border-radius:18px;padding:12px}.impact-box .small{font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:7px}.impact-box .big{font-size:12px;line-height:1.42;color:var(--ink)}.growth-track{height:6px;background:rgba(255,255,255,.06);border-radius:99px;overflow:hidden;margin:12px 0 10px}.growth-fill{height:100%;width:62%;border-radius:99px;background:linear-gradient(90deg,var(--gold),var(--blue))}.device-row{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.device-tile{border:1px solid rgba(201,169,110,.09);background:rgba(255,255,255,.018);border-radius:18px;padding:12px}.device-tile b{display:block;font-size:12px;color:var(--gold-p);font-weight:500;margin-bottom:4px}.device-tile span{font-size:10px;color:var(--ink3);line-height:1.3}.stage-note{border:1px solid rgba(135,180,201,.12);background:rgba(135,180,201,.035);border-radius:20px;padding:13px;margin-top:12px;color:var(--ink2);font-size:11px;line-height:1.55}.stage-note b{color:var(--blue-p);font-weight:500}
+
+
+
+.chat-card{padding:0;min-height:620px;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(33,30,24,.88),rgba(18,15,11,.92)),radial-gradient(circle at 48% 12%,rgba(201,169,110,.08),transparent 42%)}
+.chat-header{display:flex;align-items:center;justify-content:space-between;padding:17px 17px 12px;border-bottom:1px solid rgba(201,169,110,.08)}
+.chat-header-title{font-family:var(--serif);font-size:20px;font-weight:300;color:var(--ink);line-height:1.1}
+.live-pill{display:inline-flex;align-items:center;gap:7px;border:1px solid rgba(201,169,110,.13);background:rgba(201,169,110,.045);border-radius:999px;padding:7px 10px;color:var(--gold-p);font-size:9px;letter-spacing:.09em;text-transform:uppercase}
+.live-pill:before{content:"";width:6px;height:6px;border-radius:50%;background:var(--gold);box-shadow:0 0 12px rgba(201,169,110,.55)}
+.chat-stream{flex:1;display:flex;flex-direction:column;gap:11px;padding:14px 13px 10px;min-height:390px}
+.chat-day{align-self:center;border:1px solid rgba(201,169,110,.08);background:rgba(255,255,255,.018);border-radius:999px;padding:6px 10px;color:var(--ink3);font-size:9px;letter-spacing:.1em;text-transform:uppercase;margin-bottom:2px}
+.chat-message{display:flex;gap:9px;align-items:flex-end}
+.chat-message.user{justify-content:flex-end}
+.assistant-avatar{flex:0 0 auto;width:36px;height:36px;border-radius:15px;border:1px solid rgba(201,169,110,.12);background:rgba(201,169,110,.05);display:flex;align-items:center;justify-content:center;color:var(--gold-p);font-family:var(--serif);font-size:15px}
+.assistant-avatar.penguin-dot{color:#F1A9B2}
+.chat-bubble{max-width:246px;border:1px solid rgba(201,169,110,.10);background:rgba(255,255,255,.024);padding:12px 13px;border-radius:20px 20px 20px 7px;color:var(--ink2);font-size:12px;line-height:1.55}
+.chat-bubble b{color:var(--gold-p);font-weight:500}
+.assistant-bubble{border-color:rgba(201,169,110,.20);background:linear-gradient(135deg,rgba(201,169,110,.08),rgba(135,180,201,.02))}
+.user-bubble{max-width:242px;border-color:rgba(135,180,201,.13);background:rgba(135,180,201,.05);border-radius:20px 20px 7px 20px;color:var(--blue-p)}
+.user-bubble b{color:var(--blue-p);font-weight:500}
+.msg-time{font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:6px}
+.inline-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.mini-action{border:1px solid rgba(201,169,110,.12);background:rgba(0,0,0,.10);border-radius:999px;color:var(--gold-p);font-size:10px;padding:7px 9px;cursor:pointer}
+.scene-bubble{display:grid;grid-template-columns:66px 1fr;gap:8px;align-items:center}
+.chat-suggestions{display:flex;gap:7px;overflow-x:auto;padding:10px 13px 8px;border-top:1px solid rgba(201,169,110,.08);scrollbar-width:none}
+.chat-suggestions::-webkit-scrollbar{display:none}
+.suggestion-chip{flex:0 0 auto;border:1px solid rgba(201,169,110,.11);background:rgba(255,255,255,.018);border-radius:999px;color:var(--ink2);font-size:10px;padding:9px 11px;cursor:pointer;white-space:nowrap}
+.suggestion-chip:hover,.suggestion-chip.active{border-color:rgba(201,169,110,.24);background:rgba(201,169,110,.07);color:var(--gold-p)}
+.chat-input-row{height:48px;margin:0 13px 14px;border:1px solid rgba(201,169,110,.11);background:rgba(255,255,255,.018);border-radius:20px;display:flex;align-items:center;justify-content:space-between;padding:0 6px 0 13px;color:var(--ink3);font-size:11px;cursor:pointer}
+.send-btn{width:35px;height:35px;border-radius:14px;border:0;background:linear-gradient(135deg,var(--gold),#EAD9B4);color:#19140E;font-size:14px;cursor:pointer}
+.typing{display:inline-flex;gap:4px;align-items:center}
+.typing i{display:block;width:4px;height:4px;border-radius:50%;background:var(--gold-d);animation:typing 1.2s infinite ease-in-out}
+.typing i:nth-child(2){animation-delay:.15s}.typing i:nth-child(3){animation-delay:.3s}
+@keyframes typing{0%,100%{opacity:.3;transform:translateY(0)}50%{opacity:1;transform:translateY(-3px)}}
+
+
+
+
+/* Animal change record */
+.animal-record{display:grid;gap:10px;margin-top:12px}
+.animal-event{display:grid;grid-template-columns:74px 1fr;gap:12px;align-items:center;border:1px solid rgba(201,169,110,.09);background:rgba(255,255,255,.018);border-radius:20px;padding:10px}
+.animal-event.current{border-color:rgba(201,169,110,.22);background:linear-gradient(135deg,rgba(201,169,110,.075),rgba(135,180,201,.025))}
+.animal-event.future{border-style:dashed;opacity:.82}
+.animal-mini{height:74px;border-radius:18px;background:radial-gradient(circle at 50% 45%,rgba(255,218,176,.12),transparent 72%),rgba(0,0,0,.10);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.animal-copy .animal-time{font-size:8px;color:var(--gold-d);letter-spacing:.14em;text-transform:uppercase;margin-bottom:5px}
+.animal-copy b{display:block;font-size:12px;color:var(--ink);font-weight:500;margin-bottom:4px}
+.animal-copy span{font-size:10px;line-height:1.42;color:var(--ink2)}
+.shift-chip{display:inline-flex;margin-top:7px;border:1px solid rgba(135,180,201,.12);background:rgba(135,180,201,.04);color:var(--blue-p);border-radius:999px;padding:6px 8px;font-size:9px}
+.fox-shadow{position:relative;width:48px;height:52px;filter:drop-shadow(0 12px 18px rgba(0,0,0,.28));opacity:.78}
+.fox-shadow:before{content:"";position:absolute;left:5px;top:17px;width:38px;height:30px;border-radius:45% 45% 50% 50%;background:linear-gradient(180deg,#9C6B3E,#573627)}
+.fox-shadow:after{content:"";position:absolute;left:9px;top:5px;width:30px;height:24px;border-radius:50% 50% 44% 44%;background:linear-gradient(180deg,#C9874D,#6A412C)}
+.fox-ear{position:absolute;top:0;width:14px;height:20px;border-radius:80% 20% 70% 20%;background:#C9874D}
+.fox-ear.l{left:8px;transform:rotate(-22deg)}.fox-ear.r{right:8px;transform:rotate(22deg)}
+.fox-tail{position:absolute;right:-3px;top:24px;width:20px;height:12px;border-radius:50%;background:#D79B61;transform:rotate(-25deg)}
+.animal-mini .scene.tiny{transform:scale(.82)}
+
+/* More natural Resa Impact visualization */
+.impact-story{margin-top:12px;border:1px solid rgba(201,169,110,.09);background:rgba(0,0,0,.12);border-radius:22px;padding:14px}
+.impact-axis{display:flex;justify-content:space-between;font-size:8px;color:var(--ink3);letter-spacing:.12em;text-transform:uppercase;margin:0 4px 9px}
+.rhythm-row{display:grid;grid-template-columns:62px 1fr;gap:10px;align-items:center;margin:12px 0}
+.rhythm-label{font-size:10px;color:var(--gold-d);letter-spacing:.12em;text-transform:uppercase}
+.rhythm-track{position:relative;height:34px;border-radius:999px;background:linear-gradient(90deg,rgba(135,180,201,.06),rgba(201,169,110,.08),rgba(217,154,145,.08));border:1px solid rgba(201,169,110,.08);overflow:hidden}
+.rhythm-track:before{content:"";position:absolute;left:0;top:50%;width:100%;height:1px;background:rgba(201,169,110,.13)}
+.rhythm-marker{position:absolute;top:50%;transform:translate(-50%,-50%);width:18px;height:18px;border-radius:50%;background:linear-gradient(135deg,var(--gold),#EAD9B4);box-shadow:0 0 18px rgba(201,169,110,.28)}
+.rhythm-marker:after{content:attr(data-label);position:absolute;left:50%;top:22px;transform:translateX(-50%);white-space:nowrap;font-size:8px;color:var(--ink2)}
+.rhythm-row.before .rhythm-marker{left:76%;background:linear-gradient(135deg,#8B7355,#C9A96E);opacity:.72}
+.rhythm-row.now .rhythm-marker{left:38%;background:linear-gradient(135deg,var(--gold),#EAD9B4)}
+.window-gain{display:flex;align-items:center;justify-content:space-between;margin-top:17px;border-top:1px solid rgba(201,169,110,.08);padding-top:12px}
+.gain-copy{font-size:11px;line-height:1.45;color:var(--ink2)}
+.gain-copy b{color:var(--gold-p);font-weight:500}
+.gain-pill{border:1px solid rgba(135,180,201,.12);background:rgba(135,180,201,.04);color:var(--blue-p);border-radius:999px;padding:8px 10px;font-size:10px;white-space:nowrap}
+.change-list{display:grid;gap:8px;margin-top:12px}
+.change-item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;border:1px solid rgba(201,169,110,.08);background:rgba(255,255,255,.018);border-radius:18px;padding:11px}
+.change-dot{width:28px;height:28px;border-radius:12px;background:rgba(201,169,110,.08);display:flex;align-items:center;justify-content:center;color:var(--gold-p);font-size:12px}
+.change-text b{display:block;font-size:12px;color:var(--ink);font-weight:500;margin-bottom:3px}
+.change-text span{font-size:10px;line-height:1.35;color:var(--ink3)}
+.change-meter{width:46px;height:5px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+.change-meter i{display:block;height:100%;border-radius:999px;background:linear-gradient(90deg,var(--gold),var(--blue))}
+
+.bottom-nav{position:absolute;left:18px;right:18px;bottom:18px;height:60px;border:1px solid rgba(201,169,110,.12);background:rgba(10,9,7,.88);backdrop-filter:blur(18px);border-radius:26px;display:grid;grid-template-columns:repeat(4,1fr);align-items:center;z-index:10}.nav-item{display:flex;flex-direction:column;align-items:center;gap:5px;color:var(--ink3);font-size:9px;letter-spacing:.04em;cursor:pointer}.nav-dot{width:5px;height:5px;border-radius:50%;background:var(--ink4)}.nav-item.active{color:var(--gold-p)}.nav-item.active .nav-dot{background:var(--gold);box-shadow:0 0 12px rgba(201,169,110,.55)}
+.scrim{position:absolute;inset:0;background:rgba(0,0,0,.28);backdrop-filter:blur(1px);opacity:0;pointer-events:none;z-index:28;transition:.28s ease}.scrim.show{opacity:1;pointer-events:auto}.sheet{position:absolute;left:0;right:0;bottom:0;max-height:68%;overflow:auto;background:rgba(18,15,11,.97);border-top:1px solid rgba(201,169,110,.18);border-radius:30px 30px 0 0;padding:17px 22px 30px;z-index:30;transform:translateY(104%);transition:.35s cubic-bezier(.2,.8,.2,1);box-shadow:0 -30px 80px rgba(0,0,0,.55);scrollbar-width:none}.sheet.show{transform:translateY(0)}.handle{width:42px;height:4px;border-radius:999px;background:rgba(201,169,110,.22);margin:0 auto 15px;cursor:pointer}.sheet-x{position:absolute;top:16px;right:18px;width:30px;height:30px;border:1px solid rgba(201,169,110,.10);border-radius:50%;background:rgba(255,255,255,.018);color:var(--ink3);font-size:18px;line-height:26px;cursor:pointer}.sheet h3{font-family:var(--serif);font-weight:300;font-size:24px;margin-bottom:10px;padding-right:28px}.sheet p{font-size:12px;line-height:1.7;color:var(--ink2);margin-bottom:14px}.sheet-row{border:1px solid rgba(201,169,110,.09);background:rgba(255,255,255,.02);border-radius:18px;padding:12px 13px;margin-bottom:9px}.sheet-row b{display:block;color:var(--gold-p);font-weight:500;font-size:11px;margin-bottom:5px}.sheet-row span{display:block;color:var(--ink2);font-size:11px;line-height:1.45}.close{width:100%;height:43px;border:0;border-radius:17px;background:rgba(201,169,110,.08);color:var(--gold-d);margin-top:6px;cursor:pointer}
+@media(max-width:430px){body{background:var(--void)}.device{width:100vw;height:100vh;border-radius:0}.device:before{display:none}.content{padding-left:16px;padding-right:16px}.bottom-nav{left:14px;right:14px}}
+</style>
+</head>
+<body>
+<div class="device">
+  <div class="screen">
+    <div class="status"><span>17:53</span><span>5G 90%</span></div>
+    <div class="top"><div class="logo">RESA</div><div class="sensor-pill"><span class="sensor-dot"></span><span>Sensor active</span></div></div>
+    <main class="content">
+
+      <section class="page active" id="page-home">
+        <div class="state-tabs"><button class="state-btn active" data-state="learn">Day 3</button><button class="state-btn" data-state="birth">Day 7</button><button class="state-btn" data-state="live">Live</button><button class="state-btn" data-state="shift">Cycle</button></div>
+        <div class="home-state active" id="home-learn">
+          <div class="card"><div class="kicker">Day 3 of 7 · baseline period</div><h1 class="title">Resa is learning <em>your rhythm.</em></h1><p class="sub">Wear the sensor and live normally. No body judgement yet — Resa is building your first baseline before generating your companion.</p><div class="scene" style="opacity:.38;filter:blur(3px)"><div class="penguin-scene"><div class="pg-tuft"></div><div class="pg-tuft two"></div><div class="pg-star"></div><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-blush l"></div><div class="pg-blush r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="pg-foot l"></div><div class="pg-foot r"></div></div></div><div class="progress-card"><div class="progress-top"><div class="progress-title">First body baseline</div><div class="progress-day">3 / 7</div></div><div class="progress-bar"><div class="progress-fill"></div></div></div></div>
+          <div class="card soft"><div class="label">What to do now</div><p class="copy">Keep wearing the sensor and live as usual. Around Day 7, Resa will create your first body companion. It is an initial mapping, not a final label.</p></div>
+        </div>
+        <div class="home-state" id="home-birth">
+          <div class="card"><div class="kicker">Day 7 · companion generated</div><div class="scene growth"><div class="penguin-scene"><div class="pg-tuft"></div><div class="pg-tuft two"></div><div class="pg-star"></div><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-blush l"></div><div class="pg-blush r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="pg-foot l"></div><div class="pg-foot r"></div><div class="warmth-glow"></div><div class="warm-bottle"><div class="knit"></div></div></div></div><div class="companion-caption">Meet your first body companion.</div><div class="decision-panel"><div class="decision-row primary-row"><div class="decision-label">Companion</div><div class="decision-main">Penguin · recovery phase</div></div><div class="decision-row"><div class="decision-label">Meaning</div><div class="decision-text">It reflects recent needs for <strong>warmth, slower energy and recovery support</strong>. It is not your personality.</div></div><div class="decision-row"><div class="decision-label">Next</div><div class="decision-text">As Resa learns more, your penguin will grow and may enter a new animal stage.</div></div></div></div>
+        </div>
+        <div class="home-state" id="home-live">
+          <div class="signal-strip"><div class="signal-text">Latest signal · current body decision</div><div class="signal-time">14:10</div></div>
+          <div class="card"><div class="kicker">Home · highest priority now</div><div class="scene warm"><div class="penguin-scene"><div class="pg-tuft"></div><div class="pg-tuft two"></div><div class="pg-star"></div><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-blush l"></div><div class="pg-blush r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="pg-foot l"></div><div class="pg-foot r"></div><div class="warmth-glow"></div><div class="warm-bottle"><div class="knit"></div></div></div></div><div class="companion-caption">Your penguin sat down with a warm bottle.</div><div class="decision-panel"><div class="decision-row primary-row"><div class="decision-label">What is happening</div><div class="decision-main">Your energy is starting to dip.</div></div><div class="decision-row"><div class="decision-label">Why it matters</div><div class="decision-text">Resa noticed <strong>lighter sleep last night</strong> and <strong>lower recovery this afternoon</strong>. Today is better for recovery than pushing through.</div></div><div class="decision-row"><div class="decision-label">Recommended now</div><div class="decision-text">Start with one small reset, then keep the afternoon slower.</div></div></div><button class="primary open-sheet" data-sheet="reset" style="width:100%;margin-top:14px">Start 30-sec reset</button><div class="soft-explain"><span>Need more context?</span><button class="soft-link open-sheet" data-sheet="why">Resa can explain</button></div></div>
+          <div class="card soft"><div class="label">Today rhythm</div><div class="timeline"><div class="time-node"><div class="time">Morning</div><div class="time-state">Stable</div><div class="time-note">keep normal pace</div></div><div class="time-node active"><div class="time">Afternoon</div><div class="time-state">Slow down</div><div class="time-note">energy may dip</div></div><div class="time-node"><div class="time">Evening</div><div class="time-state">Wind down</div><div class="time-note">finish earlier</div></div></div></div>
+        </div>
+        <div class="home-state" id="home-shift">
+          <div class="card"><div class="kicker">Cycle signal · light preview</div><div class="scene growth"><div class="walk-path"></div><div class="penguin-scene"><div class="pg-tuft"></div><div class="pg-tuft two"></div><div class="pg-star"></div><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-blush l"></div><div class="pg-blush r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="pg-foot l"></div><div class="pg-foot r"></div><div class="warmth-glow"></div><div class="warm-bottle"><div class="knit"></div></div></div></div><div class="decision-panel"><div class="decision-row primary-row"><div class="decision-label">What is new</div><div class="decision-main">A steadier rhythm may be forming.</div></div><div class="decision-row"><div class="decision-label">Homepage preview</div><div class="decision-text">Resa is seeing earlier recovery response across recent cycles. Detailed companion growth and stage history live in Me.</div></div></div><button class="secondary jump-me" style="width:100%;margin-top:14px">View companion growth</button></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-action">
+        <div class="kicker">Action · gentle body plan</div><h1 class="title">Keep today softer.</h1><p class="sub">Resa turns your current body signal into scene-based actions. No tasks, no streaks — just what may help now.</p>
+        <div class="card"><div class="row"><div><div class="label">Recommended first</div><div class="card-title">Start with one small reset.</div><p class="copy">Your energy is starting to dip. The penguin switches from warmth to breathing mode to help you slow down.</p></div><div class="scene tiny breathe"><div class="penguin-scene"><div class="breath-bubble"></div><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-blush l"></div><div class="pg-blush r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="pg-foot l"></div><div class="pg-foot r"></div></div></div></div><button class="primary open-sheet" data-sheet="reset" style="margin-top:14px;width:100%">Start 30-sec reset</button><div class="feedback"><button class="feedback-btn">Better</button><button class="feedback-btn">Same</button><button class="feedback-btn">Not now</button></div></div>
+        <div class="card soft"><div class="label">Today actions</div><div class="action-list">
+          <div class="action-item open-sheet" data-sheet="warmth"><div class="scene tiny warm"><div class="penguin-scene"><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="warm-bottle"><div class="knit"></div></div></div></div><div><div class="action-name">Warmth for 10 min</div><div class="action-desc">Penguin hugs the warm bottle when recovery mode rises.</div></div><div class="action-tag">gentle</div></div>
+          <div class="action-item open-sheet" data-sheet="movement"><div class="scene tiny walk"><div class="walk-path"></div><div class="penguin-scene"><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="pg-foot l"></div><div class="pg-foot r"></div></div></div><div><div class="action-name">Lower workout intensity</div><div class="action-desc">Penguin takes a slow walk instead of pushing hard.</div></div><div class="action-tag">adjust</div></div>
+          <div class="action-item open-sheet" data-sheet="sleep"><div class="scene tiny sleep"><div class="sleep-moon"></div><div class="penguin-scene"><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="warm-bottle"><div class="knit"></div></div></div></div><div><div class="action-name">Wind down earlier</div><div class="action-desc">Penguin dims the day and protects tonight’s recovery.</div></div><div class="action-tag">tonight</div></div>
+        </div></div>
+        <div class="card"><div class="label">Short plan · 3 days</div><div class="card-title">Recovery arc</div><p class="copy">The plan expands Home’s single recommendation into a gentle 3-day care sequence: breathe today, warm tomorrow, return gently when recovery improves.</p><div class="plan-grid"><div class="plan-day"><div class="plan-day-top"><b>Day 1</b><span>breathe</span></div><p class="copy">One reset, no pushing.</p></div><div class="plan-day"><div class="plan-day-top"><b>Day 2</b><span>warmth</span></div><p class="copy">Keep warmth and an earlier evening close.</p></div><div class="plan-day"><div class="plan-day-top"><b>Day 3</b><span>return</span></div><p class="copy">If recovery improves, penguin starts a slow walk.</p></div></div></div>
+      </section>
+
+      <section class="page" id="page-resa">
+        <div class="kicker">Resa · proactive chat</div>
+        <h1 class="title">Resa sends a message when your body changes.</h1>
+        <p class="sub">When Resa detects an unusual body signal, it starts the conversation here. You can ask for a summary, review, science explanation, or next action.</p>
+
+        <div class="card chat-card">
+          <div class="chat-header">
+            <div>
+              <div class="label">Today · 14:10</div>
+              <div class="chat-header-title">Energy dip detected</div>
+            </div>
+            <div class="live-pill">live</div>
+          </div>
+
+          <div class="chat-stream" id="resaChatStream">
+            <div class="chat-day">Today</div>
+
+            <div class="chat-message assistant proactive-message">
+              <div class="assistant-avatar">R</div>
+              <div class="chat-bubble assistant-bubble">
+                <div class="msg-time">Resa noticed · 14:10</div>
+                <b>Your energy is starting to dip.</b><br/>
+                Your penguin sat down with a warm bottle. I noticed lighter sleep last night and lower recovery this afternoon.
+                <div class="inline-actions">
+                  <button class="mini-action open-sheet" data-sheet="why">Why this?</button>
+                  <button class="mini-action open-sheet" data-sheet="reset">Start reset</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="chat-message assistant">
+              <div class="assistant-avatar penguin-dot">♡</div>
+              <div class="chat-bubble scene-bubble">
+                <div class="scene tiny warm"><div class="penguin-scene"><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="warm-bottle"><div class="knit"></div></div></div></div>
+                <div>
+                  <div class="msg-time">Suggested now</div>
+                  Keep the afternoon slower. Try one small reset first.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-suggestions">
+            <button class="suggestion-chip" data-reply="today">Today summary</button>
+            <button class="suggestion-chip" data-reply="cycle">Cycle summary</button>
+            <button class="suggestion-chip" data-reply="month">Month summary</button>
+            <button class="suggestion-chip" data-reply="review">Progress review</button>
+            <button class="suggestion-chip" data-reply="science">Body science</button>
+            <button class="suggestion-chip" data-reply="action">Next action</button>
+          </div>
+
+          <div class="chat-input-row" id="fakeInput">
+            <span>Ask Resa about your body signal</span>
+            <button class="send-btn" aria-label="Send">↗</button>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-me">
+        <div class="kicker">Me · companion profile</div><h1 class="title">Your body companion is growing with you.</h1><p class="sub">Long-term change lives here: companion growth, animal-stage records, Resa impact, and sensor management.</p>
+        <div class="card"><div class="scene growth"><div class="walk-path"></div><div class="penguin-scene"><div class="pg-tuft"></div><div class="pg-tuft two"></div><div class="pg-star"></div><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-blush l"></div><div class="pg-blush r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="pg-foot l"></div><div class="pg-foot r"></div><div class="warm-bottle"><div class="knit"></div></div></div></div><div class="label">Current companion</div><div class="card-title">Penguin · recovery phase</div><p class="copy">Growth: curled recovery → steadier rest. The companion changes when your body rhythm changes, not because you collect points.</p><div class="growth-track"><div class="growth-fill"></div></div></div>
+        <div class="card soft">
+          <div class="label">Animal change record</div>
+          <div class="card-title">How your companion has changed.</div>
+          <p class="copy">This is not a collection history. It records how Resa’s understanding of your body rhythm has changed over time.</p>
+          <div class="animal-record">
+            <div class="animal-event">
+              <div class="animal-mini">
+                <div class="scene tiny warm"><div class="penguin-scene"><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="warm-bottle"><div class="knit"></div></div></div></div>
+              </div>
+              <div class="animal-copy">
+                <div class="animal-time">Day 7 · first mapping</div>
+                <b>Penguin appeared</b>
+                <span>Resa saw a recent need for warmth, slower energy, and recovery support.</span>
+              </div>
+            </div>
+
+            <div class="animal-event current">
+              <div class="animal-mini">
+                <div class="scene tiny growth"><div class="penguin-scene"><div class="pg-body"></div><div class="pg-belly"></div><div class="pg-head"><div class="pg-faceL"></div><div class="pg-faceR"></div><div class="pg-eye l"></div><div class="pg-eye r"></div><div class="pg-beak"></div></div><div class="pg-wing l"></div><div class="pg-wing r"></div><div class="warm-bottle"><div class="knit"></div></div></div></div>
+              </div>
+              <div class="animal-copy">
+                <div class="animal-time">Week 2 · current</div>
+                <b>Penguin rests more steadily</b>
+                <span>Energy dips are noticed earlier, so recovery mode is less intense.</span>
+                <div class="shift-chip">current stage</div>
+              </div>
+            </div>
+
+            <div class="animal-event future">
+              <div class="animal-mini">
+                <div class="fox-shadow"><div class="fox-ear l"></div><div class="fox-ear r"></div><div class="fox-tail"></div></div>
+              </div>
+              <div class="animal-copy">
+                <div class="animal-time">Future possibility</div>
+                <b>A fox shadow may appear</b>
+                <span>If active energy windows keep growing across future cycles, Resa may start a new animal stage.</span>
+              </div>
+            </div>
+          </div>
+          <div class="stage-note"><b>How switching works:</b><br/>Animals do not randomly change. This record only updates when Resa sees a body-stage shift across enough time.</div>
+        </div>
+        <div class="card soft">
+          <div class="label">Resa impact</div>
+          <div class="card-title">Your recovery window is moving earlier.</div>
+          <p class="copy">Instead of showing a score, Resa shows how your response pattern is changing: you notice the dip earlier, choose a gentler action, and protect recovery sooner.</p>
+
+          <div class="impact-story">
+            <div class="impact-axis"><span>early signal</span><span>heavy dip</span></div>
+            <div class="rhythm-row before">
+              <div class="rhythm-label">Before</div>
+              <div class="rhythm-track"><div class="rhythm-marker" data-label="noticed late"></div></div>
+            </div>
+            <div class="rhythm-row now">
+              <div class="rhythm-label">Now</div>
+              <div class="rhythm-track"><div class="rhythm-marker" data-label="Resa prompts"></div></div>
+            </div>
+            <div class="window-gain">
+              <div class="gain-copy"><b>Change Resa sees:</b><br/>you slow down before the dip gets heavier.</div>
+              <div class="gain-pill">earlier care</div>
+            </div>
+          </div>
+
+          <div class="change-list">
+            <div class="change-item"><div class="change-dot">1</div><div class="change-text"><b>Notice earlier</b><span>Energy dips are no longer discovered only after fatigue gets obvious.</span></div><div class="change-meter"><i style="width:72%"></i></div></div>
+            <div class="change-item"><div class="change-dot">2</div><div class="change-text"><b>Respond gentler</b><span>Warmth and lower intensity are becoming your useful recovery actions.</span></div><div class="change-meter"><i style="width:64%"></i></div></div>
+            <div class="change-item"><div class="change-dot">3</div><div class="change-text"><b>Recover steadier</b><span>Your penguin spends less time in intense recovery mode.</span></div><div class="change-meter"><i style="width:52%"></i></div></div>
+          </div>
+        </div>
+        
+        <div class="card soft"><div class="label">Sensor & settings</div><div class="device-row"><div class="device-tile"><b>Connected</b><span>Sensor active · syncing normally</span></div><div class="device-tile"><b>Battery</b><span>82% · enough for tonight</span></div><div class="device-tile"><b>Notifications</b><span>Soft prompts · quiet evening</span></div><div class="device-tile"><b>Privacy</b><span>Body data used for Resa insights</span></div></div></div>
+      </section>
+    </main>
+    <nav class="bottom-nav"><div class="nav-item active" data-page="page-home"><span class="nav-dot"></span><span>Home</span></div><div class="nav-item" data-page="page-action"><span class="nav-dot"></span><span>Action</span></div><div class="nav-item" data-page="page-resa"><span class="nav-dot"></span><span>Resa</span></div><div class="nav-item" data-page="page-me"><span class="nav-dot"></span><span>Me</span></div></nav>
+    <div class="scrim" id="scrim"></div><div class="sheet" id="sheet" aria-hidden="true"><button class="sheet-x" id="sheetX">×</button><div class="handle" id="sheetHandle"></div><h3 id="sheetTitle">Why this?</h3><p id="sheetText"></p><div id="sheetRows"></div><button class="close" id="closeBtn">Done</button></div>
+  </div>
+</div>
+<script>
+const content=document.querySelector('.content'), navs=[...document.querySelectorAll('.nav-item')], pages=[...document.querySelectorAll('.page')];
+navs.forEach(item=>item.addEventListener('click',()=>{navs.forEach(n=>n.classList.remove('active'));item.classList.add('active');pages.forEach(p=>p.classList.toggle('active',p.id===item.dataset.page));content.scrollTo({top:0,behavior:'smooth'})}));
+const stateBtns=[...document.querySelectorAll('.state-btn')], states=[...document.querySelectorAll('.home-state')];
+stateBtns.forEach(btn=>btn.addEventListener('click',()=>{stateBtns.forEach(b=>b.classList.remove('active'));btn.classList.add('active');states.forEach(s=>s.classList.toggle('active',s.id==='home-'+btn.dataset.state));content.scrollTo({top:0,behavior:'smooth'})}));
+
+
+const chatReplies={
+  today:{
+    user:'Today summary',
+    resa:'Today summary: your morning looked stable, but energy started dipping around 14:10. I suggest one reset now, a slower afternoon, and an earlier wind-down tonight.'
+  },
+  cycle:{
+    user:'Cycle summary',
+    resa:'Cycle summary: this cycle, your penguin entered recovery mode earlier before your period. I am watching whether slowing down sooner helps next-day recovery.'
+  },
+  month:{
+    user:'Month summary',
+    resa:'Month summary: compared with your first week, you noticed dips earlier and responded sooner. Warmth and lower workout intensity seem to be the most helpful actions so far.'
+  },
+  review:{
+    user:'Progress review',
+    resa:'Review: your recovery mode is becoming easier to recognize. The biggest change is not fewer dips yet — it is that you are catching them earlier.'
+  },
+  science:{
+    user:'Body science',
+    resa:'Science note: lighter sleep and lower recovery often make the body spend more energy maintaining normal pace. That is why a small reset can help before fatigue gets heavier.'
+  },
+  action:{
+    user:'Next action',
+    resa:'Next action: do the 30-second reset first. If you still feel low after 30–60 minutes, use warmth for 10 minutes and keep the evening lighter.'
+  },
+  input:{
+    user:'What should I pay attention to now?',
+    resa:'Right now, the key is not to push through the dip. Treat this as a recovery window: reset once, lower intensity, and check again later.'
+  }
+};
+function appendUserMessage(text){
+  const stream=document.getElementById('resaChatStream');
+  if(!stream)return;
+  const row=document.createElement('div');
+  row.className='chat-message user';
+  row.innerHTML=`<div class="chat-bubble user-bubble"><b>${text}</b></div>`;
+  stream.appendChild(row);
+  stream.scrollTop=stream.scrollHeight;
+}
+function appendResaMessage(text){
+  const stream=document.getElementById('resaChatStream');
+  if(!stream)return;
+  const typing=document.createElement('div');
+  typing.className='chat-message assistant';
+  typing.innerHTML=`<div class="assistant-avatar">R</div><div class="chat-bubble"><span class="typing"><i></i><i></i><i></i></span></div>`;
+  stream.appendChild(typing);
+  stream.scrollTop=stream.scrollHeight;
+  setTimeout(()=>{
+    typing.innerHTML=`<div class="assistant-avatar">R</div><div class="chat-bubble"><div class="msg-time">Resa replies</div>${text}</div>`;
+    stream.scrollTop=stream.scrollHeight;
+  },420);
+}
+document.querySelectorAll('.suggestion-chip').forEach(btn=>btn.addEventListener('click',()=>{
+  document.querySelectorAll('.suggestion-chip').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const data=chatReplies[btn.dataset.reply];
+  appendUserMessage(data.user);
+  appendResaMessage(data.resa);
+}));
+document.getElementById('fakeInput')?.addEventListener('click',()=>{
+  const data=chatReplies.input;
+  appendUserMessage(data.user);
+  appendResaMessage(data.resa);
+});
+
+
+document.querySelectorAll('.jump-me').forEach(btn=>btn.addEventListener('click',()=>{
+  navs.forEach(n=>n.classList.toggle('active',n.dataset.page==='page-me'));
+  pages.forEach(p=>p.classList.toggle('active',p.id==='page-me'));
+  content.scrollTo({top:0,behavior:'smooth'});
+}));
+
+const sheet=document.getElementById('sheet'), scrim=document.getElementById('scrim'), sheetTitle=document.getElementById('sheetTitle'), sheetText=document.getElementById('sheetText'), sheetRows=document.getElementById('sheetRows');
+function rows(items){sheetRows.innerHTML=items.map(item=>`<div class="sheet-row"><b>${item[0]}</b><span>${item[1]}</span></div>`).join('')}
+const sheetData={
+why:{title:'How Resa read this',text:'This is a light explanation, not a data report. Resa keeps the homepage simple and saves deeper details in chat.',rows:[['Lighter sleep','Last night looked less restorative than your early baseline.'],['Lower recovery','This afternoon moved toward a lower-energy pattern, so Resa recommends recovery over pushing.']]},
+reset:{title:'30-sec reset',text:'The penguin enters breathing mode. A tiny reset for a lower-energy moment.',rows:[['Inhale','Breathe in gently for 4 seconds.'],['Exhale','Breathe out slowly for 6 seconds.']]},
+warmth:{title:'Warmth for 10 min',text:'Penguin hugs the warm bottle when recovery mode rises.',rows:[['How','Use a warm bottle or warm compress. Keep it gentle.'],['After','Resa can observe whether tonight feels steadier.']]},
+movement:{title:'Lower workout intensity',text:'Penguin takes a slow walk instead of pushing hard.',rows:[['Swap','Replace HIIT or heavy training with stretching or a slow walk.'],['Why','Your recovery signal is softer, so pushing may cost more today.']]},
+sleep:{title:'Wind down earlier',text:'Penguin dims the day and protects tonight’s recovery.',rows:[['Tonight','Close high-stimulation activities earlier.'],['Tomorrow','Resa will check whether recovery looks steadier.']]},
+askTired:{title:'Why am I tired?',text:'Resa connects today’s signal with your recent baseline.',rows:[['Today','Lighter sleep + lower recovery + afternoon energy dip.'],['Meaning','Your body may need recovery before productivity.']]},
+askMove:{title:'Can I exercise?',text:'Resa suggests the safest intensity for today’s body state.',rows:[['Today','Light movement is better than high intensity.'],['Try','Slow walk, stretch, or short mobility.']]},
+askPenguin:{title:'Why penguin?',text:'The penguin is your current body companion because your recent signals lean toward recovery, warmth and slower energy.',rows:[['Not a label','It is not your personality.'],['Can change','If your long-term rhythm shifts, a new animal stage may appear.']]},
+askPeriod:{title:'Related to my cycle?',text:'Resa compares today’s signal with your cycle history once enough cycles are collected.',rows:[['Early stage','After one cycle, Resa starts seeing cycle rhythm.'],['Stable stage','After several cycles, patterns become more trustworthy.']]}
+};
+function openSheet(type){const data=sheetData[type]||sheetData.why;sheetTitle.textContent=data.title;sheetText.textContent=data.text;rows(data.rows);sheet.classList.add('show');scrim.classList.add('show');sheet.setAttribute('aria-hidden','false')}
+function closeSheet(){sheet.classList.remove('show');scrim.classList.remove('show');sheet.setAttribute('aria-hidden','true')}
+document.querySelectorAll('.open-sheet').forEach(el=>el.addEventListener('click',()=>openSheet(el.dataset.sheet)));
+document.getElementById('closeBtn').addEventListener('click',closeSheet);document.getElementById('sheetX').addEventListener('click',closeSheet);document.getElementById('sheetHandle').addEventListener('click',closeSheet);scrim.addEventListener('click',closeSheet);document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSheet()});
+document.querySelectorAll('.feedback-btn').forEach(btn=>btn.addEventListener('click',()=>{document.querySelectorAll('.feedback-btn').forEach(b=>b.classList.remove('selected'));btn.classList.add('selected')}));
+</script>
+</body>
+</html>
